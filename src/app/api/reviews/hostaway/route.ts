@@ -4,6 +4,7 @@ import { AuthenticatedRequest, withAuth } from "@/lib/authMiddleware";
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 
+export const dynamic = 'force-dynamic';
 
 export const GET = withAuth(async function handler(request: AuthenticatedRequest) {
 

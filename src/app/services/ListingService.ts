@@ -12,8 +12,14 @@ class ListingService {
      * @returns  A promise that resolves to an array of Property objects.
      */
     async fetchListings(): Promise<Property[]> {
-        const listings: Property[] = await prisma.property.findMany();
-        return listings;
+        const response = await fetch(`${HOSTAWAY_API_BASE}/listings`, {
+            headers: {
+                'Authorization': `Bearer ${HOSTAWAY_API_KEY}`
+            }
+        });
+
+        const data = await response.json();
+        return data.result as Property[];
     }
 
     /**

@@ -4,7 +4,7 @@ export interface Review {
   type: string
   rating: number|null
   publicReview: string
-  reviewCategory: ReviewCategory[]
+  reviewCategory: ReviewCategory[] | null
   submittedAt: string
   guestName: string
   listingName: string

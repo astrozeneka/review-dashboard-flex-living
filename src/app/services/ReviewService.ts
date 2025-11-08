@@ -9,8 +9,14 @@ class ReviewService {
      * @returns A promise that resolves to an array of Review objects.
      */
     async fetchReviews(): Promise<Review[]> {
-        const reviews: Review[] = await prisma.review.findMany();
-        return reviews;
+        const reviews: any[]= await prisma.review.findMany();
+        // Parse the review category
+        reviews.forEach(review => {
+            if (review.reviewCategory && typeof review.reviewCategory === 'string') {
+                review.reviewCategory = JSON.parse(review.reviewCategory);
+            }
+        });
+        return reviews as Review[];
     }
 
     /**
@@ -19,13 +25,19 @@ class ReviewService {
      * @returns A promise that resolves to the Review object if found, or null if not found.
      */
     async fetchReviewsByListingId(listingId: string, publishedOnly: boolean = true): Promise<Review[] | null> {
-        const reviews = await prisma.review.findMany({
+        const reviews: any[] = await prisma.review.findMany({
             where: {
                 listingId: parseInt(listingId),
                 ...(publishedOnly && { isPublished: true }),
             },
         });
-        return reviews;
+        // Parse the review category
+        reviews.forEach(review => {
+            if (review.reviewCategory && typeof review.reviewCategory === 'string') {
+                review.reviewCategory = JSON.parse(review.reviewCategory);
+            }
+        });
+        return reviews as Review[];
     }
 
     /**
@@ -34,12 +46,16 @@ class ReviewService {
      * @returns A promise that resolves to the Review object if found, or null if not found.
      */
     async fetchReviewById(reviewId: string): Promise<Review | null> {
-        const review = await prisma.review.findUnique({
+        const review: any = await prisma.review.findUnique({
             where: {
                 id: parseInt(reviewId),
             },
         });
-        return review;
+        // Parse the review category
+        if (review && review.reviewCategory && typeof review.reviewCategory === 'string') {
+            review.reviewCategory = JSON.parse(review.reviewCategory);
+        }
+        return review as Review | null;
     }
 
     /**
@@ -48,7 +64,7 @@ class ReviewService {
      * @returns A promise that resolves to the updated Review object.
      */
     async approveReview(reviewId: string): Promise<Review | null> {
-        const updatedReview = await prisma.review.update({
+        const updatedReview: any = await prisma.review.update({
             where: {
                 id: parseInt(reviewId),
             },
@@ -56,7 +72,11 @@ class ReviewService {
                 isPublished: true,
             },
         });
-        return updatedReview;
+        // Parse the review category
+        if (updatedReview && updatedReview.reviewCategory && typeof updatedReview.reviewCategory === 'string') {
+            updatedReview.reviewCategory = JSON.parse(updatedReview.reviewCategory);
+        }
+        return updatedReview as Review | null;
     }
 }
 // Singleton instance

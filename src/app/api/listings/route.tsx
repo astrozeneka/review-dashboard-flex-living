@@ -1,6 +1,8 @@
 import { withAuth } from "@/lib/authMiddleware";
 import { NextRequest, NextResponse } from "next/server";
 
+export const dynamic = 'force-dynamic';
+
 const HOSTAWAY_API_BASE = process.env.HOSTAWAY_API_BASE;
 const HOSTAWAY_API_KEY = process.env.HOSTAWAY_API_KEY;
 

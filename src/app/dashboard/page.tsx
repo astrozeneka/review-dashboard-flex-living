@@ -53,7 +53,7 @@ export default function Dashboard() {
 
         fetchData();
 
-    }, [token]);
+    }, [token, fetchHostawayReviews]);
 
     const handleLogout = async (e: React.MouseEvent) => {
         e.preventDefault();
