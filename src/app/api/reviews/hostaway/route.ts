@@ -1,4 +1,4 @@
-import { Review } from "@/app/services/review";
+import { Review } from "@/app/types/review";
 import { reviewService } from "@/app/services/ReviewService";
 import { AuthenticatedRequest, withAuth } from "@/lib/authMiddleware";
 import { prisma } from "@/lib/prisma";

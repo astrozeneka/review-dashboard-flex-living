@@ -3,8 +3,8 @@
 import { useAuth } from '@/app/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { Review } from '../services/review';
-import { fetchHostawayReviews } from '@/lib/api-client';
+import { Review } from '../types/review';
+import { useApi } from '../contexts/ApiContext';
 
 export default function Dashboard() {
     const { user, logout, token } = useAuth();
@@ -12,6 +12,7 @@ export default function Dashboard() {
     const [error, setError] = useState<string | null>(null);
     const [listings, setListings] = useState<any[]>([]);
     const [reviews, setReviews] = useState<Review[]>([]);
+    const { fetchHostawayReviews } = useApi();
 
     // TODO: move this code to a suitable section
     useEffect(() => {
@@ -37,7 +38,7 @@ export default function Dashboard() {
 
             // Load reviews
             try {
-                const hostawayReviewsResponse = await fetchHostawayReviews(token);
+                const hostawayReviewsResponse = await fetchHostawayReviews();
                 console.log("Hostaway Reviews Response:", hostawayReviewsResponse);
                 setReviews(hostawayReviewsResponse.result);
             } catch (error) {
@@ -95,6 +96,7 @@ export default function Dashboard() {
                                 <p className="text-yellow-500">Rating: {review.rating ?? 'N/A'}</p>
                                 <p className="mt-2">{review.publicReview}</p>
                                 <p className="text-sm text-gray-500 mt-1">Submitted on: {new Date(review.submittedAt).toLocaleDateString()}</p>
+                                <p className="text-sm text-gray-500 mt-1">Status: {review.isPublished ? 'Published' : 'Pending'}</p>
                             </div>
                         ))}
                     </div>
