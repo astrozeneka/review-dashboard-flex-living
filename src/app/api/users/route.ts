@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/prisma'
 import { NextResponse } from 'next/server'
+import { hashPassword, generateToken } from "@/lib/auth";
 
 export async function POST(request: Request) {
     const { email, name, password } = await request.json()
@@ -16,14 +17,25 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: 'Password must be at least 6 characters long' }, { status: 422 })
     }
 
+    // Hash the password
+    const hashedPassword = await hashPassword(password);
+
     const user = await prisma.user.create({
-        data: { email, name, password }
+        data: { email, name, password: hashedPassword }
     })
 
-    return NextResponse.json({ 
+    // Generate auth tokens
+    const token = generateToken({
+        userId: user.id.toString(),
+        email: user.email
+    });
+
+    // const refreshToken = await createRefreshToken(user.id.toString(), 'web-app');
+    
+    return NextResponse.json({
         user,
         message: 'Registration successful',
-        // token,
+        token,
         // refreshToken,
     }, { status: 201 })
 }

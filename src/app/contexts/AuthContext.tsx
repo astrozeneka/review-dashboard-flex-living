@@ -1,3 +1,5 @@
+'use client';
+
 import { createContext, ReactNode, useContext, useEffect, useState } from "react";
 
 
@@ -6,11 +8,11 @@ interface User { }
 interface AuthContextType {
     user: User | null;
     token: string | null;
-    refreshToken: string | null;
+    // refreshToken: string | null;
     login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
     register: (name: string, email: string, password: string) => Promise<{ success: boolean; error?: string }>;
     logout: () => void;
-    refreshAuthToken: () => Promise<boolean>;
+    // refreshAuthToken: () => Promise<boolean>;
     loading: boolean;
     isAuthenticated: boolean;
 }
@@ -89,7 +91,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     };
 
     // The login function (used by context consumers)
-    const login = async (email: string, password: string) => {
+    const login = async (email: string, password: string): Promise<{ success: boolean; error?: string }> => {
         setLoading(true);
         try {
             const response = await fetch('/api/auth/login', {
@@ -110,10 +112,15 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
                 setUser(data.user);                                                 // Not yet tested
                 setLoading(false);
                 return { success: true };                                         // Not yet tested
+            } else {
+                const errorData = await response.json();
+                setError(errorData.error || 'Login failed');
+                return { success: false, error: errorData.error || 'Login failed' };
             }
         } catch (error) {
             console.error('Login error:', error);
             setError('Login failed');
+            return { success: false, error: 'Login failed' };
         } finally {
             setLoading(false);
         }
@@ -123,7 +130,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     const register = async (name: string, email: string, password: string) => {
         setLoading(true);
         try {
-            const response = await fetch('/api/auth/register', {
+            const response = await fetch('/api/users', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -141,10 +148,15 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
                 setUser(data.user);
                 setLoading(false);
                 return { success: true };
+            } else {
+                const errorData = await response.json();
+                setError(errorData.error || 'Registration failed');
+                return { success: false, error: errorData.error || 'Registration failed' };
             }
         } catch (error) {
             console.error('Registration error:', error);
             setError('Registration failed');
+            return { success: false, error: 'Registration failed' };
         } finally {
             setLoading(false);
         }
@@ -159,4 +171,18 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         localStorage.removeItem('refreshToken');
         localStorage.removeItem('userData');
     }
+
+  const value = {
+    user,
+    token,
+    // refreshToken,
+    login,
+    register,
+    logout,
+    // refreshAuthToken,
+    loading,
+    isAuthenticated: !!token && !!user,
+  };
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
