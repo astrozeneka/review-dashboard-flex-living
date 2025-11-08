@@ -7,6 +7,11 @@ import { Review } from '../types/review';
 import { useApi } from '../contexts/ApiContext';
 import DetailModal from '../components/DetailModal';
 import ReviewApprovalForm from '../components/ReviewApprovalForm';
+import FilterBar, { FilterState } from '../components/FilterBar';
+import ReviewCard from '../components/ReviewCard';
+import ToastContainer from '../components/ToastContainer';
+import ReviewsLoadingSkeleton from '../components/ReviewsLoadingSkeleton';
+import { useToast } from '../hooks/useToast';
 
 export default function Dashboard() {
     const { user, logout, token } = useAuth();
@@ -14,46 +19,117 @@ export default function Dashboard() {
     const [error, setError] = useState<string | null>(null);
     const [listings, setListings] = useState<any[]>([]);
     const [reviews, setReviews] = useState<Review[]>([]);
+    const [filteredReviews, setFilteredReviews] = useState<Review[]>([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedReview, setSelectedReview] = useState<Review | null>(null);
+    const [isReviewLoading, setIsReviewLoading] = useState(false);
+    const [filters, setFilters] = useState<FilterState>({
+        status: 'all',
+        property: 'all',
+        channel: 'all',
+        topic: 'all',
+        rating: 'all',
+        sort: 'date-desc',
+    });
     const { fetchHostawayReviews } = useApi();
+    const { toasts, addToast, removeToast } = useToast();
 
     // TODO: move this code to a suitable section
     useEffect(() => {
-        if (!token) {
+        console.log("IsReviewLoading:", isReviewLoading);
+        if (!token || isReviewLoading) {
             return;
         }
 
         const fetchData = async () => {
-            // Load listings data
-            const response = await fetch('/api/listings', {
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                },
-            });
-
-            if (!response.ok) {
-                setError('Failed to load listings');
-                return;
-            }
-
-            const data = await response.json();
-            setListings(data.listings);
-
-            // Load reviews
+            setIsReviewLoading(true);
             try {
-                const hostawayReviewsResponse = await fetchHostawayReviews();
-                console.log("Hostaway Reviews Response:", hostawayReviewsResponse);
-                setReviews(hostawayReviewsResponse.result);
-            } catch (error) {
-                // Error will be managed here
-            }
+                // Load listings data
+                const response = await fetch('/api/listings', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                    },
+                });
 
+                if (!response.ok) {
+                    setError('Failed to load listings');
+                    return;
+                }
+
+                const data = await response.json();
+                setListings(data.listings);
+
+                // Load reviews
+                try {
+                    const hostawayReviewsResponse = await fetchHostawayReviews();
+                    console.log("Hostaway Reviews Response:", hostawayReviewsResponse);
+                    setReviews(hostawayReviewsResponse.result);
+                } catch (error) {
+                    // Error will be managed here
+                }
+            } finally {
+                setIsReviewLoading(false);
+            }
         };
 
         fetchData();
 
     }, [token, fetchHostawayReviews]);
+
+    // Filter and sort reviews
+    useEffect(() => {
+        let result = [...reviews];
+
+        // Apply status filter
+        if (filters.status !== 'all') {
+            result = result.filter(r => {
+                const status = r.isPublished ? 'approved' : 'pending';
+                return status === filters.status;
+            });
+        }
+
+        // Apply property filter
+        if (filters.property !== 'all') {
+            result = result.filter(r => r.listingName === filters.property);
+        }
+
+        // Apply channel filter
+        if (filters.channel !== 'all') {
+            result = result.filter(r => r.channel === filters.channel);
+        }
+
+        // Apply topic filter
+        if (filters.topic !== 'all') {
+            result = result.filter(r => {
+                if (!r.reviewCategory) return false;
+                return r.reviewCategory.some(cat => cat.category === filters.topic);
+            });
+        }
+
+        // Apply rating filter
+        if (filters.rating !== 'all') {
+            const minRating = parseFloat(filters.rating);
+            result = result.filter(r => (r.rating || 0) >= minRating);
+        }
+
+        // Apply sorting
+        result.sort((a, b) => {
+            switch (filters.sort) {
+                case 'date-desc':
+                    return new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime();
+                case 'date-asc':
+                    return new Date(a.submittedAt).getTime() - new Date(b.submittedAt).getTime();
+                case 'rating-desc':
+                    return (b.rating || 0) - (a.rating || 0);
+                case 'rating-asc':
+                    return (a.rating || 0) - (b.rating || 0);
+                default:
+                    return 0;
+            }
+        });
+
+        setFilteredReviews(result);
+    }, [reviews, filters]);
 
     const handleLogout = async (e: React.MouseEvent) => {
         e.preventDefault();
@@ -100,6 +176,7 @@ export default function Dashboard() {
                                 const updatedReviews = [...reviews];
                                 updatedReviews[index] = updatedReview;
                                 setReviews(updatedReviews);
+                                addToast('Review approved successfully!', 'success');
                             }
                         }}
                     />
@@ -121,35 +198,40 @@ export default function Dashboard() {
             {/* Reviews Section */}
             <div className="mt-12">
                 <h2 className="text-2xl font-bold mb-4">Reviews</h2>
-                {reviews.length === 0 ? (
-                    <p>No reviews available.</p>
+                <FilterBar listings={listings} onFilterChange={setFilters} />
+
+                {isReviewLoading ? (
+                    <ReviewsLoadingSkeleton count={6} />
+                ) : filteredReviews.length === 0 ? (
+                    <div className="bg-white rounded-lg shadow-sm p-12 text-center mt-6">
+                        <svg className="w-16 h-16 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+                        </svg>
+                        <h3 className="text-lg font-semibold text-gray-900 mb-2">No reviews found</h3>
+                        <p className="text-gray-600">Try adjusting your filters to see more reviews.</p>
+                    </div>
                 ) : (
-                    <div className="space-y-4">
-                        {reviews.map((review) => (
-                            <div key={review.id} className="p-4 border rounded bg-white">
-                                <div className="flex justify-between items-start mb-2">
-                                    <div className="flex-1">
-                                        <h3 className="text-lg font-semibold">Review by {review.guestName}</h3>
-                                        <p className="text-yellow-500">Rating: {review.rating ?? 'N/A'}</p>
-                                    </div>
-                                    <button
-                                        onClick={() => {
-                                            setSelectedReview(review);
-                                            setIsModalOpen(true);
-                                        }}
-                                        className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 whitespace-nowrap"
-                                    >
-                                        View Details
-                                    </button>
-                                </div>
-                                <p className="mt-2">{review.publicReview}</p>
-                                <p className="text-sm text-gray-500 mt-1">Submitted on: {new Date(review.submittedAt).toLocaleDateString()}</p>
-                                <p className="text-sm text-gray-500 mt-1">Status: {review.isPublished ? 'Published' : 'Pending'}</p>
-                            </div>
+                    <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6 mt-6">
+                        {filteredReviews.map((review) => (
+                            <ReviewCard
+                                key={review.id}
+                                review={review}
+                                onViewDetails={(selectedReview) => {
+                                    setSelectedReview(selectedReview);
+                                    setIsModalOpen(true);
+                                }}
+                                onApprove={(reviewToApprove) => {
+                                    setSelectedReview(reviewToApprove);
+                                    setIsModalOpen(true);
+                                }}
+                            />
                         ))}
                     </div>
                 )}
             </div>
+
+            {/* Toast Container */}
+            <ToastContainer toasts={toasts} onClose={removeToast} />
         </div>
     );
 }
