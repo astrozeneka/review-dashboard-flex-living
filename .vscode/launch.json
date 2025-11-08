@@ -1,0 +1,58 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    
+    {
+      "name": "Launch Chrome",
+      "request": "launch",
+      "type": "chrome",
+      "url": "http://localhost:8080",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Next.js: debug server-side",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/node_modules/.bin/next",
+      "args": ["dev"],
+      "console": "integratedTerminal",
+      "serverReadyAction": {
+        "pattern": "ready - started server on .* url:",
+        "uriFormat": "http://localhost:%s",
+        "action": "openExternalURL"
+      }
+    },
+    {
+      "name": "Next.js: debug client-side",
+      "type": "chrome",
+      "request": "attach",
+      "port": 9222,
+      "pathMapping": {
+        "/": "${workspaceFolder}/",
+        "/_next/": "${workspaceFolder}/.next/"
+      }
+    },
+    {
+      "name": "Next.js: debug full stack",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/node_modules/.bin/next",
+      "args": ["dev"],
+      "console": "integratedTerminal",
+      "serverReadyAction": {
+        "pattern": "ready - started server on .* url:",
+        "uriFormat": "http://localhost:%s",
+        "action": "openExternalURL"
+      },
+      "skipFiles": ["<node_internals>/**"]
+    },
+    {
+      "name": "Next.js: build",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/node_modules/.bin/next",
+      "args": ["build"],
+      "console": "integratedTerminal"
+    }
+  ]
+}
