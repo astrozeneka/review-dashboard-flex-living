@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Review } from '../types/review';
 import { useApi } from '../contexts/ApiContext';
+import DetailModal from '../components/DetailModal';
+import ReviewApprovalForm from '../components/ReviewApprovalForm';
 
 export default function Dashboard() {
     const { user, logout, token } = useAuth();
@@ -12,6 +14,8 @@ export default function Dashboard() {
     const [error, setError] = useState<string | null>(null);
     const [listings, setListings] = useState<any[]>([]);
     const [reviews, setReviews] = useState<Review[]>([]);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [selectedReview, setSelectedReview] = useState<Review | null>(null);
     const { fetchHostawayReviews } = useApi();
 
     // TODO: move this code to a suitable section
@@ -63,13 +67,36 @@ export default function Dashboard() {
         <div className="p-8">
             <div className="flex justify-between items-center mb-8">
                 <h1 className="text-3xl font-bold">Hello {(user as any)?.name || ''}</h1>
-                <button
-                    onClick={handleLogout}
-                    className="px-6 py-2 bg-red-500 text-white rounded hover:bg-red-600"
-                >
-                    Logout
-                </button>
+                <div className="flex gap-4">
+                    <button
+                        onClick={() => setIsModalOpen(true)}
+                        className="px-6 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                    >
+                        View Details
+                    </button>
+                    <button
+                        onClick={handleLogout}
+                        className="px-6 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+                    >
+                        Logout
+                    </button>
+                </div>
             </div>
+
+            <DetailModal isOpen={isModalOpen} onClose={() => {
+                setIsModalOpen(false);
+                setSelectedReview(null);
+            }}>
+                {selectedReview && (
+                    <ReviewApprovalForm
+                        review={selectedReview}
+                        onClose={() => {
+                            setIsModalOpen(false);
+                            setSelectedReview(null);
+                        }}
+                    />
+                )}
+            </DetailModal>
 
             {error && <p className="text-red-500 mb-4">{error}</p>}
 
@@ -91,9 +118,22 @@ export default function Dashboard() {
                 ) : (
                     <div className="space-y-4">
                         {reviews.map((review) => (
-                            <div key={review.id} className="p-4 border rounded">
-                                <h3 className="text-lg font-semibold">Review by {review.guestName}</h3>
-                                <p className="text-yellow-500">Rating: {review.rating ?? 'N/A'}</p>
+                            <div key={review.id} className="p-4 border rounded bg-white hover:shadow-md transition">
+                                <div className="flex justify-between items-start mb-2">
+                                    <div className="flex-1">
+                                        <h3 className="text-lg font-semibold">Review by {review.guestName}</h3>
+                                        <p className="text-yellow-500">Rating: {review.rating ?? 'N/A'}</p>
+                                    </div>
+                                    <button
+                                        onClick={() => {
+                                            setSelectedReview(review);
+                                            setIsModalOpen(true);
+                                        }}
+                                        className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition whitespace-nowrap"
+                                    >
+                                        View Details
+                                    </button>
+                                </div>
                                 <p className="mt-2">{review.publicReview}</p>
                                 <p className="text-sm text-gray-500 mt-1">Submitted on: {new Date(review.submittedAt).toLocaleDateString()}</p>
                                 <p className="text-sm text-gray-500 mt-1">Status: {review.isPublished ? 'Published' : 'Pending'}</p>

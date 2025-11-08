@@ -10,8 +10,8 @@ export interface AuthenticatedRequest extends NextRequest {
   };
 }
 
-export const withAuth = (handler: (request: AuthenticatedRequest) => Promise<NextResponse>) => {
-  return async (request: NextRequest) => {
+export const withAuth = (handler: (request: AuthenticatedRequest, context?: any) => Promise<NextResponse>) => {
+  return async (request: NextRequest, context?: any) => {
     try {
       const authHeader = request.headers.get('Authorization');
       const token = extractTokenFromHeader(authHeader || '');
@@ -54,7 +54,7 @@ export const withAuth = (handler: (request: AuthenticatedRequest) => Promise<Nex
         email: user.email!
       };
 
-      return await handler(authenticatedRequest);
+      return await handler(authenticatedRequest, context);
 
     } catch (error) {
       console.error('Auth middleware error:', error);

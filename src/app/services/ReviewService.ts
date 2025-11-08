@@ -27,6 +27,37 @@ class ReviewService {
         });
         return reviews;
     }
+
+    /**
+     * Fetch a review by its ID.
+     * @param reviewId - The ID of the review to be fetched.
+     * @returns A promise that resolves to the Review object if found, or null if not found.
+     */
+    async fetchReviewById(reviewId: string): Promise<Review | null> {
+        const review = await prisma.review.findUnique({
+            where: {
+                id: parseInt(reviewId),
+            },
+        });
+        return review;
+    }
+
+    /**
+     * Approve a review by setting its isPublished field to true.
+     * @param reviewId - The ID of the review to be approved.
+     * @returns A promise that resolves to the updated Review object.
+     */
+    async approveReview(reviewId: string): Promise<Review | null> {
+        const updatedReview = await prisma.review.update({
+            where: {
+                id: parseInt(reviewId),
+            },
+            data: {
+                isPublished: true,
+            },
+        });
+        return updatedReview;
+    }
 }
 // Singleton instance
 export const reviewService = new ReviewService();
