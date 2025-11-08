@@ -31,8 +31,8 @@ export const withAuth = (handler: (request: AuthenticatedRequest) => Promise<Nex
         );
       }
 
-      const user = await prisma.users.findUnique({
-        where: { id: BigInt(payload.userId) },
+      const user = await prisma.user.findUnique({
+        where: { id: parseInt(payload.userId) },
         select: {
           id: true,
           name: true,
@@ -50,8 +50,8 @@ export const withAuth = (handler: (request: AuthenticatedRequest) => Promise<Nex
       const authenticatedRequest = request as AuthenticatedRequest;
       authenticatedRequest.user = {
         id: user.id.toString(),
-        name: user.name,
-        email: user.email
+        name: user.name!,
+        email: user.email!
       };
 
       return await handler(authenticatedRequest);

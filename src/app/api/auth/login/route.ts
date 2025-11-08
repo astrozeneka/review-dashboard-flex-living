@@ -18,11 +18,11 @@ export async function POST(request: NextRequest) {
         // Authenticate the user
         const user = await prisma.user.findUnique({
             where: { email },
-            include: {
+            // include: {
                 // Additional data to include if necessary
-            }
+            // }
         });
-        if (!user || !(await comparePassword(password, user.password))) {
+        if (!user || !(await comparePassword(password, user.password!))) {
             return NextResponse.json(
                 { error: 'Invalid credentials' },
                 { status: 401 }
