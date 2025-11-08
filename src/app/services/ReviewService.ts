@@ -1,7 +1,10 @@
 import { prisma } from "@/lib/prisma";
 import { Review } from "../types/review";
 
-
+/**
+ * Service class for managing reviews.
+ * This service class aims to mock the behavior of Hostaway's review API
+ */
 class ReviewService {
 
     /**

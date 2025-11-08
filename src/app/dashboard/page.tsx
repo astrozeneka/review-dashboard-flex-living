@@ -9,8 +9,10 @@ import DetailModal from '../components/DetailModal';
 import ReviewApprovalForm from '../components/ReviewApprovalForm';
 import FilterBar, { FilterState } from '../components/FilterBar';
 import ReviewCard from '../components/ReviewCard';
+import ListingRow from '../components/ListingRow';
 import ToastContainer from '../components/ToastContainer';
 import ReviewsLoadingSkeleton from '../components/ReviewsLoadingSkeleton';
+import ListingsLoadingSkeleton from '../components/ListingsLoadingSkeleton';
 import { useToast } from '../hooks/useToast';
 
 export default function Dashboard() {
@@ -18,6 +20,10 @@ export default function Dashboard() {
     const router = useRouter();
     const [error, setError] = useState<string | null>(null);
     const [listings, setListings] = useState<any[]>([]);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [searchResults, setSearchResults] = useState<any[]>([]);
+    const [selectedListing, setSelectedListing] = useState<any>(null);
+    const [isListingModalOpen, setIsListingModalOpen] = useState(false);
     const [reviews, setReviews] = useState<Review[]>([]);
     const [filteredReviews, setFilteredReviews] = useState<Review[]>([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -131,6 +137,23 @@ export default function Dashboard() {
         setFilteredReviews(result);
     }, [reviews, filters]);
 
+    const handleSearch = async (query: string) => {
+        setSearchQuery(query);
+        if (!query.trim()) {
+            setSearchResults([]);
+            return;
+        }
+        try {
+            const response = await fetch(`/api/listings?match=${encodeURIComponent(query)}`);
+            if (response.ok) {
+                const data = await response.json();
+                setSearchResults(data.listings || []);
+            }
+        } catch (error) {
+            console.error('Search error:', error);
+        }
+    };
+
     const handleLogout = async (e: React.MouseEvent) => {
         e.preventDefault();
         logout();
@@ -185,14 +208,48 @@ export default function Dashboard() {
 
             {error && <p className="text-red-500 mb-4">{error}</p>}
 
-            <div className="space-y-4">
-                {listings.map((listing) => (
-                    <div key={listing.id} className="p-4 border rounded">
-                        <h2 className="text-lg font-semibold">{listing.name}</h2>
-                        <p className="text-gray-600">{listing.address}</p>
-                        <p className="text-sm text-gray-500">{listing.city}, {listing.country}</p>
+            {/* Listings Section */}
+            <div className="mb-8">
+                <h2 className="text-2xl font-bold mb-4">Listings</h2>
+                <input
+                    type="text"
+                    placeholder="Search listings..."
+                    value={searchQuery}
+                    onChange={(e) => handleSearch(e.target.value)}
+                    className="w-full px-4 py-2 border rounded mb-4"
+                    disabled={isReviewLoading}
+                />
+                {isReviewLoading ? (
+                    <ListingsLoadingSkeleton count={5} />
+                ) : (
+                    <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                        <div className="overflow-x-auto">
+                            <table className="w-full">
+                                <thead className="bg-gray-50 border-b border-gray-200">
+                                    <tr>
+                                        <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Property</th>
+                                        <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Location</th>
+                                        <th className="px-4 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">Rating</th>
+                                        <th className="px-4 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">Reviews</th>
+                                        <th className="px-4 py-3 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-gray-200">
+                                    {(searchQuery.trim() ? searchResults : listings).map((listing) => (
+                                        <ListingRow
+                                            key={listing.id}
+                                            listing={listing}
+                                            onViewDetails={(listing) => {
+                                                setSelectedListing(listing);
+                                                setIsListingModalOpen(true);
+                                            }}
+                                        />
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
-                ))}
+                )}
             </div>
 
             {/* Reviews Section */}
@@ -232,6 +289,32 @@ export default function Dashboard() {
 
             {/* Toast Container */}
             <ToastContainer toasts={toasts} onClose={removeToast} />
+
+            {/* Listing Modal */}
+            {isListingModalOpen && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" onClick={() => setIsListingModalOpen(false)}>
+                    <div className="bg-white rounded-lg max-w-3xl w-full max-h-[85vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+                        {selectedListing && (
+                            <div className="p-6">
+                                <div className="flex items-center justify-between mb-6">
+                                    <div>
+                                        <h2 className="text-lg font-bold text-gray-900">{selectedListing.name}</h2>
+                                        <p className="text-sm text-gray-600">{selectedListing.address}, {selectedListing.city}</p>
+                                    </div>
+                                    <button
+                                        onClick={() => setIsListingModalOpen(false)}
+                                        className="text-gray-400 hover:text-gray-600"
+                                    >
+                                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12"></path>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

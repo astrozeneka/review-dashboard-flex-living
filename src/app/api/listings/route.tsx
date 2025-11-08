@@ -24,7 +24,7 @@ interface HostawayListingsResponse {
     result: HostawayListing[];
 }
 
-export const GET = withAuth(async function handler(request: NextRequest) {
+export const GET = async function handler(request: NextRequest) {
     try {
         // TODO Next, search and pagination
         // Validate environment variables
@@ -35,9 +35,16 @@ export const GET = withAuth(async function handler(request: NextRequest) {
             );
         }
 
+        // Sometimes a match query parameters is provided
+        const { searchParams } = new URL(request.url);
+        const params = new URLSearchParams();
+        if (searchParams.get('match')) {
+            params.append('match', searchParams.get('match') as string);
+        }
+
         // Fetch listings from Hostaway API
         // Next.js will cache this by default for the duration specified in revalidate
-        const response = await fetch(`${HOSTAWAY_API_BASE}/listings`, {
+        const response = await fetch(`${HOSTAWAY_API_BASE}/listings?${params.toString()}`, {
             headers: {
                 'Authorization': `Bearer ${HOSTAWAY_API_KEY}`,
                 'Content-Type': 'application/json',
@@ -83,4 +90,4 @@ export const GET = withAuth(async function handler(request: NextRequest) {
         );
     }
 
-});
+};
