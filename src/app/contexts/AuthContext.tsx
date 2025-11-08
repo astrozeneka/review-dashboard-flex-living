@@ -43,6 +43,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     useEffect(() => {
         const storedToken = localStorage.getItem('token');
         const storedRefreshToken = localStorage.getItem('refreshToken');
+        console.log("Sotred Token:", storedToken);
 
         if (storedToken && storedRefreshToken) {
             setToken(storedToken);
@@ -58,7 +59,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         try {
             let locallySavedUser = localStorage.getItem('userData');
             if (!locallySavedUser) throw new Error("No user data in localStorage");
-            const response = await fetch('/api/auth/user', {
+            const response = await fetch(`/api/users/${JSON.parse(locallySavedUser).id}`, {
                 headers: {
                     'Authorization': `Bearer ${authToken}`,
                     'Content-Type': 'application/json',
@@ -72,6 +73,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
                     ...data.user
                 });
             } else {
+                console.error('Failed to fetch user, logging out');
                 localStorage.removeItem('token');
                 localStorage.removeItem('refreshToken');
                 localStorage.removeItem('userData');
@@ -167,6 +169,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         setUser(null);
         setToken(null);
         setRefreshToken(null);
+        console.log("Logging out, clearing localStorage");
         localStorage.removeItem('token');
         localStorage.removeItem('refreshToken');
         localStorage.removeItem('userData');
