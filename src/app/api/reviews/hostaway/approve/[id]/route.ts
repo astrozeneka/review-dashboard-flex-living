@@ -20,6 +20,7 @@ export const POST = withAuth(async function handler(request: AuthenticatedReques
 
     return NextResponse.json({ 
         status: 'success', 
-        message: 'Review approved successfully'
+        message: 'Review approved successfully',
+        result: updatedReview
     }, { status: 200 });
 })

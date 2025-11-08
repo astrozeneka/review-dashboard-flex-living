@@ -13,7 +13,7 @@ export interface Review {
   isPublished: boolean
   createdAt: string
   updatedAt: string
-}
+} 
 
 export interface ReviewCategory {
   category: string

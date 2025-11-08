@@ -94,6 +94,14 @@ export default function Dashboard() {
                             setIsModalOpen(false);
                             setSelectedReview(null);
                         }}
+                        onReviewUpdated={(updatedReview) => {
+                            const index = reviews.findIndex(r => r.id === updatedReview.id);
+                            if (index !== -1) {
+                                const updatedReviews = [...reviews];
+                                updatedReviews[index] = updatedReview;
+                                setReviews(updatedReviews);
+                            }
+                        }}
                     />
                 )}
             </DetailModal>
@@ -118,7 +126,7 @@ export default function Dashboard() {
                 ) : (
                     <div className="space-y-4">
                         {reviews.map((review) => (
-                            <div key={review.id} className="p-4 border rounded bg-white hover:shadow-md transition">
+                            <div key={review.id} className="p-4 border rounded bg-white">
                                 <div className="flex justify-between items-start mb-2">
                                     <div className="flex-1">
                                         <h3 className="text-lg font-semibold">Review by {review.guestName}</h3>
@@ -129,7 +137,7 @@ export default function Dashboard() {
                                             setSelectedReview(review);
                                             setIsModalOpen(true);
                                         }}
-                                        className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition whitespace-nowrap"
+                                        className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 whitespace-nowrap"
                                     >
                                         View Details
                                     </button>

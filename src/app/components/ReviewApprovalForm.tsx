@@ -1,10 +1,13 @@
 'use client';
 
+import { useState } from 'react';
 import { Review } from '../types/review';
+import { useApi } from '../contexts/ApiContext';
 
 interface ReviewApprovalFormProps {
     review: Review;
     onClose?: () => void;
+    onReviewUpdated?: (updatedReview: Review) => void;
 }
 
 function StarRating({ rating }: { rating: number }) {
@@ -70,12 +73,34 @@ function formatDate(dateString: string): string {
     });
 }
 
-async function handleApproval(reviewId: number, action: 'approve' | 'reject') {
-    // TODO: Implement API call to backend
-    console.log(`Review ${reviewId} - Action: ${action}`);
-}
+export default function ReviewApprovalForm({ review, onClose, onReviewUpdated }: ReviewApprovalFormProps) {
+    const [isLoading, setIsLoading] = useState(false);
+    const {approveHostawayReview} = useApi();
 
-export default function ReviewApprovalForm({ review, onClose }: ReviewApprovalFormProps) {
+    const handleApproval = async (action: 'approve' | 'reject') => {
+        setIsLoading(true);
+        try {
+            // Call the API
+            if (action === 'approve') {
+                const result = await approveHostawayReview(review.id);
+                if (result.status === 'success') {
+                    // Close the form after approval
+                    if (onClose) {
+                        onClose();
+                    }
+                    // Notify parent about the update
+                    if (onReviewUpdated && result.result) {
+                        onReviewUpdated(result.result);
+                    }
+                }
+            }
+        } catch (error) {
+            console.error('Error approving/rejecting review:', error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+            
     return (
         <div className="space-y-6">
             {/* Header with Badges */}
@@ -117,7 +142,7 @@ export default function ReviewApprovalForm({ review, onClose }: ReviewApprovalFo
                     </div>
                 </div>
                 <div className="flex items-center space-x-2">
-                    ======={review.rating}
+                    {review.rating}
 
                     <StarRating rating={((review.rating) ?? 0) / 2} />
                     <span className="text-2xl font-bold text-gray-900">{(review.rating ?? 0).toFixed(1)}</span>
@@ -170,16 +195,28 @@ export default function ReviewApprovalForm({ review, onClose }: ReviewApprovalFo
                 {!review.isPublished ? (
                     <>
                         <button
-                            onClick={() => handleApproval(review.id, 'reject')}
-                            className="flex-1 px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-medium transition-colors duration-200"
+                            onClick={() => handleApproval('reject')}
+                            disabled={isLoading}
+                            className="flex-1 px-6 py-3 bg-gray-100 hover:bg-gray-200 disabled:bg-gray-100 disabled:opacity-50 text-gray-700 rounded-lg font-medium transition-colors duration-200 disabled:cursor-not-allowed"
                         >
                             Reject
                         </button>
                         <button
-                            onClick={() => handleApproval(review.id, 'approve')}
-                            className="flex-1 px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-colors duration-200"
+                            onClick={() => handleApproval('approve')}
+                            disabled={isLoading}
+                            className="flex-1 px-6 py-3 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-600 disabled:opacity-75 text-white rounded-lg font-medium transition-colors duration-200 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                         >
-                            Approve Review
+                            {isLoading ? (
+                                <>
+                                    <svg className="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
+                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                                    </svg>
+                                    <span>Approving...</span>
+                                </>
+                            ) : (
+                                'Approve Review'
+                            )}
                         </button>
                     </>
                 ) : (

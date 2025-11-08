@@ -6,6 +6,7 @@ import { useAuth } from "./AuthContext";
 
 interface ApiContextType {
     fetchHostawayReviews: () => Promise<{status: string; result: Review[]}>;
+    approveHostawayReview: (reviewId: number) => Promise<{status: string, message: string, result: Review|null}>;
 }
 
 const ApiContext = createContext<ApiContextType | undefined>(undefined);
@@ -42,8 +43,24 @@ export const ApiProvider = ({ children }: ApiProviderProps) => {
         return data as {status: string; result: Review[]};
     };
 
+    const approveHostawayReview = async (reviewId: number): Promise<{status: string, message: string, result: Review|null}> => {
+        const response = await fetch(`/api/reviews/hostaway/approve/${reviewId}`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ status: 'approved' }),
+        });
+        if (!response.ok) {
+            throw new Error('Failed to approve hostaway review, status: ' + response.status);
+        }
+        const data = await response.json();
+        return data as {status: string, message: string, result: Review|null};
+    };
+
     return (
-        <ApiContext.Provider value={{ fetchHostawayReviews }}>
+        <ApiContext.Provider value={{ fetchHostawayReviews, approveHostawayReview }}>
             {children}
         </ApiContext.Provider>
     );
