@@ -22,6 +22,19 @@ class ReviewService {
             if (review.reviewCategory && typeof review.reviewCategory === 'string') {
                 review.reviewCategory = JSON.parse(review.reviewCategory);
             }
+            // Sometimes rating needs to be computed
+            if (review.rating === null) {
+                const categories = review.reviewCategory as { category: string; rating: number }[] | null;
+                console.log(categories)
+                const averageRating = categories && categories.length > 0
+                    ? categories.reduce((sum, curr) => sum + curr.rating, 0) / categories.length
+                    : null;
+                review.rating = averageRating;
+                prisma.review.update({
+                    where: { id: review.id },
+                    data: { rating: averageRating },
+                });
+            }
         });
         return reviews as Review[];
     }
@@ -71,7 +84,7 @@ class ReviewService {
             where: {
                 listingId: parseInt(listingId),
                 isPublished: true,
-                createdAt: {
+                submittedAt: {
                     gte: threeMonthsAgo,
                 },
             },
@@ -87,7 +100,7 @@ class ReviewService {
             where: {
                 listingId: parseInt(listingId),
                 isPublished: true,
-                createdAt: {
+                submittedAt: {
                     gte: sixMonthsAgo,
                     lt: threeMonthsAgo,
                 },

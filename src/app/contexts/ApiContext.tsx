@@ -7,7 +7,7 @@ import { Property } from "../types/property";
 
 interface ApiContextType {
     fetchHostawayReviews: () => Promise<{status: string; result: Review[]}>;
-    approveHostawayReview: (reviewId: number) => Promise<{status: string, message: string, result: Review|null}>;
+    approveHostawayReview: (reviewId: number) => Promise<{status: string, message: string, result: Review|null, listingStats?: ReviewStatistics}>;
     fetchListingDetailsById: (listingId: string) => Promise<{status: string, result: Property, stats: ReviewStatistics}>;
 }
 

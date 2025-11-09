@@ -18,9 +18,13 @@ export const POST = withAuth(async function handler(request: AuthenticatedReques
         return NextResponse.json({ status: 'error', message: 'Failed to approve review' }, { status: 500 });
     }
 
+    // The updated listing stats
+    const updatedListingStats = await reviewService.fetchReviewStatsByListingId(updatedReview.listingId.toString());
+
     return NextResponse.json({ 
         status: 'success', 
         message: 'Review approved successfully',
-        result: updatedReview
+        result: updatedReview,
+        listingStats: updatedListingStats
     }, { status: 200 });
 })

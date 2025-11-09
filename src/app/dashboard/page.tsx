@@ -198,13 +198,27 @@ export default function Dashboard() {
                             setIsModalOpen(false);
                             setSelectedReview(null);
                         }}
-                        onReviewUpdated={(updatedReview) => {
+                        onReviewUpdated={(updatedReview, listingStats) => {
                             const index = reviews.findIndex(r => r.id === updatedReview.id);
                             if (index !== -1) {
                                 const updatedReviews = [...reviews];
                                 updatedReviews[index] = updatedReview;
                                 setReviews(updatedReviews);
                                 addToast('Review approved successfully!', 'success');
+                            }
+
+
+                            // Reload the property listings related to the review
+                            const updatedRatingAverage = listingStats?.overallAverage || 0;
+                            console.log("Updated Average:", updatedRatingAverage);
+                            const listingIndex = listings.findIndex(l => l.id === updatedReview.listingId);
+                            if (listingIndex !== -1) {
+                                const updatedListings = [...listings];
+                                updatedListings[listingIndex] = {
+                                    ...updatedListings[listingIndex],
+                                    averageRating: updatedRatingAverage,
+                                };
+                                setListings(updatedListings);
                             }
                         }}
                     />
