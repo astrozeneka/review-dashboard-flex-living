@@ -248,6 +248,20 @@ class ReviewService {
         });
         return channels.map(c => c.channel);
     }
+
+    /**
+     * Fetch recurring issues for a specific listing ID.
+     * @param listingId - The ID of the listing whose recurring issues are to be fetched.
+     * @returns A promise that resolves to the recurring issues object if found, or null if not found.
+     */
+    async fetchRecurringIssueByListingId(listingId: string): Promise<any | null> {
+        const recurringIssue = await prisma.recurringIssue.findUnique({
+            where: {
+                listingId: parseInt(listingId),
+            },
+        });
+        return recurringIssue;
+    }
 }
 // Singleton instance
 export const reviewService = new ReviewService();

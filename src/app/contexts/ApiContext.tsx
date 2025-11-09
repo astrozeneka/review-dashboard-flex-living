@@ -4,11 +4,12 @@ import { createContext, useContext } from "react";
 import { Review, ReviewStatistics, SortingCriteria } from "../types/review";
 import { useAuth } from "./AuthContext";
 import { Property } from "../types/property";
+import { RecurringIssue } from "../types/recurringIssue";
 
 interface ApiContextType {
     fetchHostawayReviews: (offset?: number, limit?: number, status?: 'all' | 'published' | 'unpublished', channel?: string, propertyName?: string, rating?: number, sortingCriteria?: SortingCriteria) => Promise<{status: string; result: Review[], hasMore: boolean}>;
     approveHostawayReview: (reviewId: number) => Promise<{status: string, message: string, result: Review|null, listingStats?: ReviewStatistics}>;
-    fetchListingDetailsById: (listingId: string) => Promise<{status: string, result: Property, stats: ReviewStatistics}>;
+    fetchListingDetailsById: (listingId: string) => Promise<{status: string, result: Property, stats: ReviewStatistics, recurringIssue: RecurringIssue|null}>;
 }
 
 const ApiContext = createContext<ApiContextType | undefined>(undefined);
@@ -45,6 +46,11 @@ export const ApiProvider = ({ children }: ApiProviderProps) => {
         return data as {status: string; result: Review[], hasMore: boolean};
     };
 
+    /**
+     * Approve a Hostaway Review
+     * @param reviewId - The ID of the review to approve
+     * @returns A promise that resolves to an object containing status, message, and result (the approved review)
+     */
     const approveHostawayReview = async (reviewId: number): Promise<{status: string, message: string, result: Review|null}> => {
         const response = await fetch(`/api/reviews/hostaway/approve/${reviewId}`, {
             method: 'POST',
@@ -66,13 +72,13 @@ export const ApiProvider = ({ children }: ApiProviderProps) => {
      * @param listingId - The ID of the listing to fetch details for
      * @returns A promise that resolves to an object containing status, result (Property), and statistics
      */
-    const fetchListingDetailsById = async (listingId: string): Promise<{status: string, result: Property, stats: any}> => {
+    const fetchListingDetailsById = async (listingId: string): Promise<{status: string, result: Property, stats: any, recurringIssue: RecurringIssue|null}> => {
         const response = await fetch(`/api/listings/${listingId}`);
         if (!response.ok) {
             throw new Error('Failed to fetch listing details, status: ' + response.status);
         }
         const data = await response.json();
-        return data as {status: string, result: Property, stats: any};
+        return data as {status: string, result: Property, stats: any, recurringIssue: RecurringIssue|null};
     };
 
     return (

@@ -7,6 +7,8 @@ export const GET = async (request: Request, { params }: { params: { id: string }
     const { id } = params;
     const listing = await listingService.fetchListingById(id);
     const stats = await reviewService.fetchReviewStatsByListingId(id);
+    const recurringIssue = await reviewService.fetchRecurringIssueByListingId(id);
+
 
     if (!listing) {
         return NextResponse.json({
@@ -18,6 +20,7 @@ export const GET = async (request: Request, { params }: { params: { id: string }
     return NextResponse.json({
         status: 'success',
         result: listing,
-        stats: stats
+        stats: stats,
+        recurringIssue: recurringIssue
     });
 }

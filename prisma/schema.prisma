@@ -66,3 +66,13 @@ model ListingPlaceMapping {
   
   @@index([googlePlaceId])
 }
+
+model RecurringIssue {
+  id            Int      @id @default(autoincrement())
+  listingId     Int      @unique // Hostaway listing ID (one-to-one)
+
+  notes         Json?
+  
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
