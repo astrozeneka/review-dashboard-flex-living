@@ -200,7 +200,7 @@ export default function Dashboard() {
                         <span style={{ color: "#B4E051" }}>F</span>LEXLIVING
                     </div>
                     <div className="flex items-center gap-6">
-                        <span className="text-gray-700">👋 Bonjour {(user as any)?.name || 'Ryan'}</span>
+                        <span className="text-gray-700">👋 Hello {(user as any)?.name || 'Ryan'}</span>
                         <button
                             onClick={handleLogout}
                             className="px-4 py-2 text-sm text-gray-700 hover:text-gray-900 font-medium"

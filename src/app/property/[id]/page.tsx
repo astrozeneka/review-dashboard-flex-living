@@ -231,7 +231,7 @@ export default async function PropertyDetail({ params }: { params: { id: string 
                         </div>
                     </div>
                     <div className="flex items-center gap-2">
-                        <span className="text-gray-700">👋 Bonjour Ryan</span>
+                        <span className="text-gray-700">👋 Hello Ryan</span>
                         <svg
                             width="20"
                             height="20"
