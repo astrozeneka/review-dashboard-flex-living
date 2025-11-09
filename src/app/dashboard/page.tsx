@@ -2,7 +2,7 @@
 
 import { useAuth } from '@/app/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { Review, SortingCriteria } from '../types/review';
 import { useApi } from '../contexts/ApiContext';
 import DetailModal from '../components/DetailModal';
@@ -35,6 +35,7 @@ export default function Dashboard() {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedReview, setSelectedReview] = useState<Review | null>(null);
     const [isReviewLoading, setIsReviewLoading] = useState(false);
+    const isLoadingRef = useRef(false);
     const [filters, setFilters] = useState<FilterState>({
         status: 'all',
         property: 'all',
@@ -124,7 +125,8 @@ export default function Dashboard() {
 
     // Function to load more reviews for pagination
     const loadReviews = async (offset: number, limit: number, token: string, status: 'all' | 'published' | 'unpublished', channel: string = 'all', propertyName: string = '', rating: number | undefined = undefined, sortingCriteria: SortingCriteria = 'date_desc') => {
-        if (!token || isReviewLoading) return;
+        if (!token || isLoadingRef.current) return;
+        isLoadingRef.current = true;
         setIsReviewLoading(true);
         try {
             const response = fetchHostawayReviews(offset, limit, status, channel, propertyName, rating, sortingCriteria);
@@ -141,12 +143,13 @@ export default function Dashboard() {
             // Wait 1s
             // await new Promise(resolve => setTimeout(resolve, 1000));
             setIsReviewLoading(false);
+            isLoadingRef.current = false;
         }
     }
 
     // Keep track of the scroll status to manage pagination
     useEffect(() => {
-        if (!token || isListingLoading) return;
+        if (!token) return;
 
         const handleScroll = () => {
             const scrollTop = window.scrollY;
@@ -346,7 +349,7 @@ export default function Dashboard() {
 
                 {/* 'hasMoreReviews' is used to preserve the scroll position */}
                 {(isReviewLoading || hasMoreReviews) ? (
-                    <ReviewsLoadingSkeleton count={6} />
+                    <ReviewsLoadingSkeleton count={3} />
                 ) : <></>}
             </div>
 
