@@ -82,7 +82,7 @@ function formatDate(dateString: string): string {
 
 export default function ReviewCard({ review, onViewDetails, onApprove }: ReviewCardProps) {
     return (
-        <div className="bg-white rounded-lg shadow-sm p-6 hover:shadow-md transition-shadow duration-200 animate-fade-in">
+        <div className="bg-white rounded-lg shadow-sm p-6 hover:shadow-md transition-shadow">
             {/* Header with badges and rating */}
             <div className="flex items-start justify-between mb-4">
                 <div className="flex-1">

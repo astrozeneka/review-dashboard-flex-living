@@ -21,12 +21,14 @@ export default function Dashboard() {
     const router = useRouter();
     const [error, setError] = useState<string | null>(null);
     const [listings, setListings] = useState<any[]>([]);
+    const [isListingLoading, setIsListingLoading] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const [searchResults, setSearchResults] = useState<any[]>([]);
     const [selectedListing, setSelectedListing] = useState<any>(null);
     const [isListingModalOpen, setIsListingModalOpen] = useState(false);
     const [reviews, setReviews] = useState<Review[]>([]);
     const [reviewOffset, setReviewOffset] = useState(0);
+    const [hasMoreReviews, setHasMoreReviews] = useState(true);
     const reviewPageSize = 12;
     const [filteredReviews, setFilteredReviews] = useState<Review[]>([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -52,6 +54,7 @@ export default function Dashboard() {
 
         const fetchData = async () => {
             setIsReviewLoading(true);
+            setIsListingLoading(true);
             try {
                 // Load listings data
                 const response = await fetch('/api/listings', {
@@ -67,16 +70,19 @@ export default function Dashboard() {
 
                 const data = await response.json();
                 setListings(data.listings);
+                setIsListingLoading(false);
 
                 // Load reviews
                 try {
-                    const hostawayReviewsResponse = await fetchHostawayReviews();
+                    const hostawayReviewsResponse = await fetchHostawayReviews(0, reviewPageSize);
                     setReviews(hostawayReviewsResponse.result);
+                    setHasMoreReviews(hostawayReviewsResponse.hasMore);
                 } catch (error) {
                     // Error will be managed here
                 }
             } finally {
                 setIsReviewLoading(false);
+                setIsListingLoading(false);
             }
         };
 
@@ -86,7 +92,7 @@ export default function Dashboard() {
 
     // Filter and sort reviews
     useEffect(() => {
-        let result = [...reviews];
+        /*let result = [...reviews];
 
         // Apply status filter
         if (filters.status !== 'all') {
@@ -136,23 +142,41 @@ export default function Dashboard() {
             }
         });
 
-        setFilteredReviews(result);
-    }, [reviews, filters]);
+        setFilteredReviews(result);*/
+
+        // console.log("Applying filters:", filters);
+
+        // Clear reviews
+        setFilteredReviews(reviews);
+        // setReviews([]);
+    }, [reviews]);
+
+    useEffect(() => {
+        setFilteredReviews(reviews);
+        // If 'status' filter is applied
+        setReviews([]);
+        loadReviews(0, reviewPageSize, token!, filters.status);
+        console.log("Filters changed, reloading reviews:", filters);
+
+    }, [filters]);
 
     // Function to load more reviews for pagination
-    const loadReviews = async (offset: number, limit: number, token: string) => {
-        console.log("Token:", token);
+    const loadReviews = async (offset: number, limit: number, token: string, status: 'all' | 'published' | 'unpublished') => {
         if (!token) return;
         setIsReviewLoading(true);
         console.log("Loading more reviews:", offset, limit);
         try {
-            const response = fetchHostawayReviews(offset, limit);
+            const response = fetchHostawayReviews(offset, limit, status);
             const data = await response;
             console.log("Fetched Reviews:", data.result.length);
             setReviews((prevReviews) => [...prevReviews, ...data.result]);
+            setReviewOffset(offset + limit);
+            setHasMoreReviews(data.hasMore);
         } catch (error) {
             console.error("Error fetching more reviews:", error);
         } finally {
+            // Wait 1s
+            await new Promise(resolve => setTimeout(resolve, 1000));
             setIsReviewLoading(false);
         }
     }
@@ -166,18 +190,17 @@ export default function Dashboard() {
             const docHeight = document.documentElement.scrollHeight;
             const winHeight = window.innerHeight;
             const remainingScroll = docHeight - (scrollTop + winHeight);
-            console.log("Remaining Scroll:", remainingScroll);
-            if (remainingScroll < 100 && !isReviewLoading) {
+            if (remainingScroll < 600 && !isReviewLoading && hasMoreReviews) {
                 // User is near the bottom of the page
-                setReviewOffset((prevOffset) => prevOffset + reviewPageSize);
-                loadReviews(reviewOffset + reviewPageSize, reviewPageSize, token);
+                // setReviewOffset((prevOffset) => prevOffset + reviewPageSize);
+                loadReviews(reviewOffset + reviewPageSize, reviewPageSize, token, filters.status);
             }
         };
 
         window.addEventListener('scroll', handleScroll);
 
         return () => window.removeEventListener('scroll', handleScroll);
-    }, [token, reviewOffset, isReviewLoading]);
+    }, [token, reviewOffset, isReviewLoading, filters.status]);
 
     const handleSearch = async (query: string) => {
         setSearchQuery(query);
@@ -279,7 +302,7 @@ export default function Dashboard() {
                     className="w-full px-4 py-2 border rounded mb-4"
                     disabled={isReviewLoading}
                 />
-                {isReviewLoading ? (
+                {isListingLoading ? (
                     <ListingsLoadingSkeleton count={5} />
                 ) : (
                     <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
@@ -356,7 +379,8 @@ export default function Dashboard() {
                     </div>
                 )}
 
-                {isReviewLoading ? (
+                {/* 'hasMoreReviews' is used to preserve the scroll position */}
+                {(isReviewLoading || hasMoreReviews) ? (
                     <ReviewsLoadingSkeleton count={6} />
                 ) : <></>}
             </div>

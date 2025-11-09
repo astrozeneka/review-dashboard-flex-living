@@ -6,7 +6,7 @@ interface FilterBarProps {
 }
 
 export interface FilterState {
-    status: string;
+    status: "all" | "published" | "unpublished";
     property: string;
     channel: string;
     topic: string;
@@ -18,14 +18,14 @@ export default function FilterBar({ listings, onFilterChange }: FilterBarProps) 
     const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const { name, value } = e.target;
         const currentFilters = {
-            status: (document.getElementById('filterStatus') as HTMLSelectElement)?.value || 'all',
+            status: (document.getElementById('filterStatus') as HTMLSelectElement)?.value as "all" | "published" | "unpublished"|| 'all',
             property: (document.getElementById('filterProperty') as HTMLSelectElement)?.value || 'all',
             channel: (document.getElementById('filterChannel') as HTMLSelectElement)?.value || 'all',
             topic: (document.getElementById('filterTopic') as HTMLSelectElement)?.value || 'all',
             rating: (document.getElementById('filterRating') as HTMLSelectElement)?.value || 'all',
             sort: (document.getElementById('sortBy') as HTMLSelectElement)?.value || 'date-desc',
         };
-        currentFilters[name as keyof FilterState] = value;
+        currentFilters[name as keyof FilterState] = value as any;
         onFilterChange(currentFilters);
     };
 
