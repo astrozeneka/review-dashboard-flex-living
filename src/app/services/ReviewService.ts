@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { Review } from "../types/review";
+import { Review, ReviewStatistics, StarCount } from "../types/review";
 
 /**
  * Service class for managing reviews.
@@ -12,7 +12,11 @@ class ReviewService {
      * @returns A promise that resolves to an array of Review objects.
      */
     async fetchReviews(): Promise<Review[]> {
-        const reviews: any[]= await prisma.review.findMany();
+        const reviews: any[]= await prisma.review.findMany({
+            orderBy: {
+                createdAt: 'desc',
+            },
+        });
         // Parse the review category
         reviews.forEach(review => {
             if (review.reviewCategory && typeof review.reviewCategory === 'string') {
@@ -57,6 +61,86 @@ class ReviewService {
             },
         });
         return count;
+    }
+
+    async fetchReviewStatsByListingId(listingId: string): Promise<ReviewStatistics> {
+        // Last trimester average
+        const threeMonthsAgo = new Date();
+        threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
+        const lastThreeMonthsAverage: number = await prisma.review.aggregate({
+            where: {
+                listingId: parseInt(listingId),
+                isPublished: true,
+                createdAt: {
+                    gte: threeMonthsAgo,
+                },
+            },
+            _avg: {
+                rating: true,
+            },
+        }).then(result => result._avg.rating || 0);
+
+        // Previous trimester average
+        const sixMonthsAgo = new Date();
+        sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+        const previousThreeMonthsAverage: number = await prisma.review.aggregate({
+            where: {
+                listingId: parseInt(listingId),
+                isPublished: true,
+                createdAt: {
+                    gte: sixMonthsAgo,
+                    lt: threeMonthsAgo,
+                },
+            },
+            _avg: {
+                rating: true,
+            },
+        }).then(result => result._avg.rating || 0);
+
+        // Overall average
+        const overallAverage: number = await prisma.review.aggregate({
+            where: {
+                listingId: parseInt(listingId),
+                isPublished: true,
+            },
+            _avg: {
+                rating: true,
+            },
+        }).then(result => result._avg.rating || 0);
+
+        // Count
+        const count: number = await prisma.review.count({
+            where: {
+                listingId: parseInt(listingId),
+                isPublished: true,
+            },
+        });
+
+        // Aggregate by star count (2, 4, 6, 8, 10 since rating is from 1 to 10)
+        const starCount: StarCount = {
+            "2": 0,
+            "4": 0,
+            "6": 0,
+            "8": 0,
+            "10": 0,
+        };
+        for (let i = 2; i <= 10; i += 2) {
+            starCount[i.toString() as keyof StarCount] = await prisma.review.count({
+                where: {
+                    listingId: parseInt(listingId),
+                    isPublished: true,
+                    rating: i,
+                },
+            });
+        }
+
+        return {
+            lastThreeMonthsAverage,
+            previousThreeMonthsAverage,
+            overallAverage,
+            count,
+            starCount
+        };
     }
 
     /**

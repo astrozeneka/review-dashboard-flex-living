@@ -1,12 +1,14 @@
 "use client";
 
 import { createContext, useContext } from "react";
-import { Review } from "../types/review";
+import { Review, ReviewStatistics } from "../types/review";
 import { useAuth } from "./AuthContext";
+import { Property } from "../types/property";
 
 interface ApiContextType {
     fetchHostawayReviews: () => Promise<{status: string; result: Review[]}>;
     approveHostawayReview: (reviewId: number) => Promise<{status: string, message: string, result: Review|null}>;
+    fetchListingDetailsById: (listingId: string) => Promise<{status: string, result: Property, stats: ReviewStatistics}>;
 }
 
 const ApiContext = createContext<ApiContextType | undefined>(undefined);
@@ -59,8 +61,22 @@ export const ApiProvider = ({ children }: ApiProviderProps) => {
         return data as {status: string, message: string, result: Review|null};
     };
 
+    /**
+     * Fetch Listing Details by ID
+     * @param listingId - The ID of the listing to fetch details for
+     * @returns A promise that resolves to an object containing status, result (Property), and statistics
+     */
+    const fetchListingDetailsById = async (listingId: string): Promise<{status: string, result: Property, stats: any}> => {
+        const response = await fetch(`/api/listings/${listingId}`);
+        if (!response.ok) {
+            throw new Error('Failed to fetch listing details, status: ' + response.status);
+        }
+        const data = await response.json();
+        return data as {status: string, result: Property, stats: any};
+    };
+
     return (
-        <ApiContext.Provider value={{ fetchHostawayReviews, approveHostawayReview }}>
+        <ApiContext.Provider value={{ fetchHostawayReviews, approveHostawayReview, fetchListingDetailsById }}>
             {children}
         </ApiContext.Provider>
     );

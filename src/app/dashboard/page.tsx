@@ -7,6 +7,7 @@ import { Review } from '../types/review';
 import { useApi } from '../contexts/ApiContext';
 import DetailModal from '../components/DetailModal';
 import ReviewApprovalForm from '../components/ReviewApprovalForm';
+import ListingDetails from '../components/ListingDetails';
 import FilterBar, { FilterState } from '../components/FilterBar';
 import ReviewCard from '../components/ReviewCard';
 import ListingRow from '../components/ListingRow';
@@ -182,10 +183,14 @@ export default function Dashboard() {
                 </div>
             </div>
 
-            <DetailModal isOpen={isModalOpen} onClose={() => {
-                setIsModalOpen(false);
-                setSelectedReview(null);
-            }}>
+            <DetailModal
+                isOpen={isModalOpen}
+                onClose={() => {
+                    setIsModalOpen(false);
+                    setSelectedReview(null);
+                }}
+                title="Review Details"
+            >
                 {selectedReview && (
                     <ReviewApprovalForm
                         review={selectedReview}
@@ -303,30 +308,24 @@ export default function Dashboard() {
             <ToastContainer toasts={toasts} onClose={removeToast} />
 
             {/* Listing Modal */}
-            {isListingModalOpen && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" onClick={() => setIsListingModalOpen(false)}>
-                    <div className="bg-white rounded-lg max-w-3xl w-full max-h-[85vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
-                        {selectedListing && (
-                            <div className="p-6">
-                                <div className="flex items-center justify-between mb-6">
-                                    <div>
-                                        <h2 className="text-lg font-bold text-gray-900">{selectedListing.name}</h2>
-                                        <p className="text-sm text-gray-600">{selectedListing.address}, {selectedListing.city}</p>
-                                    </div>
-                                    <button
-                                        onClick={() => setIsListingModalOpen(false)}
-                                        className="text-gray-400 hover:text-gray-600"
-                                    >
-                                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12"></path>
-                                        </svg>
-                                    </button>
-                                </div>
-                            </div>
-                        )}
-                    </div>
-                </div>
-            )}
+            <DetailModal
+                isOpen={isListingModalOpen}
+                onClose={() => {
+                    setIsListingModalOpen(false);
+                    setSelectedListing(null);
+                }}
+                title="Listing Details"
+            >
+                {selectedListing && (
+                    <ListingDetails
+                        listing={selectedListing}
+                        onClose={() => {
+                            setIsListingModalOpen(false);
+                            setSelectedListing(null);
+                        }}
+                    />
+                )}
+            </DetailModal>
         </div>
     );
 }

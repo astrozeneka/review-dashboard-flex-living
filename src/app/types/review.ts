@@ -19,3 +19,19 @@ export interface ReviewCategory {
   category: string
   rating: number
 }
+
+export interface ReviewStatistics {
+  lastThreeMonthsAverage: number
+  previousThreeMonthsAverage: number
+  overallAverage: number
+  count: number
+  starCount: StarCount
+}
+
+export interface StarCount {
+  "2": number
+  "4": number
+  "6": number
+  "8": number
+  "10": number
+}
