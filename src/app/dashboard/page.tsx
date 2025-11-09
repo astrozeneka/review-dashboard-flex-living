@@ -176,7 +176,7 @@ export default function Dashboard() {
             console.error("Error fetching more reviews:", error);
         } finally {
             // Wait 1s
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            // await new Promise(resolve => setTimeout(resolve, 1000));
             setIsReviewLoading(false);
         }
     }
