@@ -1,3 +1,4 @@
+import { reviewService } from "@/app/services/ReviewService";
 import { withAuth } from "@/lib/authMiddleware";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -68,14 +69,16 @@ export const GET = async function handler(request: NextRequest) {
 
 
         // Normalize/simplify the response if needed
-        const listings = data.result.map(listing => ({
+        const listings = await Promise.all(data.result.map(async listing => ({
             id: listing.id,
             name: listing.name,
             address: listing.address,
             city: listing.city,
             country: listing.country,
             picture: listing.picture,
-        }));
+            averageRating: await reviewService.fetchAverageRatingByListingId(listing.id.toString()),
+            reviewsCount: await reviewService.fetchReviewsCountByListingId(listing.id.toString(), false)
+        })));
 
         return NextResponse.json({
             success: true,

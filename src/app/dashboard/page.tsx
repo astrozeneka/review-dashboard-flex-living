@@ -243,6 +243,18 @@ export default function Dashboard() {
                                                 setSelectedListing(listing);
                                                 setIsListingModalOpen(true);
                                             }}
+                                            onTriggerReviewFilter={(listing) => {
+                                                setFilters((prev) => ({
+                                                    ...prev,
+                                                    property: listing.name,
+                                                }));
+                                                window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+                                                // Set the selectbox programmaticaly
+                                                const filterPropertySelect = document.getElementById('filterProperty') as HTMLSelectElement;
+                                                if (filterPropertySelect) {
+                                                    filterPropertySelect.value = listing.name;
+                                                }
+                                            }}
                                         />
                                     ))}
                                 </tbody>

@@ -1,8 +1,13 @@
 import { listingService } from "@/app/services/ListingService";
 import { Property } from "@/app/types/property";
+import { PropertyMap } from "@/app/components/PropertyMap";
+import { commonAmenities } from "@/app/utils/amenityIcons";
+import { Review } from "@/app/types/review";
+import { reviewService } from "@/app/services/ReviewService";
 
 export default async function PropertyDetail({ params }: { params: { id: string } }) {
     const listing: Property | null = await listingService.fetchListingById(params.id);
+    const reviews: Review[] | null = await reviewService.fetchReviewsByListingId(params.id);
 
     if (!listing) {
         return <div className="flex items-center justify-center h-screen">Listing not found</div>;
@@ -11,6 +16,11 @@ export default async function PropertyDetail({ params }: { params: { id: string 
     const sortedImages = listing.listingImages?.sort((a, b) => a.sortOrder - b.sortOrder) || [];
     const mainImage = sortedImages[0];
     const additionalImages = sortedImages.slice(1, 4);
+
+    // Filter amenities to display common ones in a meaningful order
+    const filteredAmenities = listing.listingAmenities?.filter(amenity =>
+        commonAmenities.includes(amenity.amenityName)
+    ) || [];
 
     return (
         <>
@@ -77,6 +87,120 @@ export default async function PropertyDetail({ params }: { params: { id: string 
 
                 .voir-emplacement-btn:hover {
                     background: #2D3A2B;
+                }
+
+                .section-title {
+                    font-size: 24px;
+                    font-weight: 700;
+                    margin-bottom: 20px;
+                    margin-top: 32px;
+                }
+
+                .amenity-item {
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    padding: 12px;
+                    border-radius: 8px;
+                    background: #f9fafb;
+                }
+
+                .amenity-icon {
+                    width: 20px;
+                    height: 20px;
+                    color: #3D4A3B;
+                    flex-shrink: 0;
+                }
+
+                .description-text {
+                    color: #374151;
+                    line-height: 1.6;
+                    white-space: pre-wrap;
+                    word-wrap: break-word;
+                }
+
+                .review-container {
+                    display: grid;
+                    gap: 16px;
+                }
+
+                .review-card {
+                    background: white;
+                    border: 1px solid #e5e7eb;
+                    border-radius: 8px;
+                    padding: 24px;
+                }
+
+                .review-header {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: flex-start;
+                    margin-bottom: 16px;
+                }
+
+                .review-author {
+                    display: flex;
+                    flex-direction: column;
+                }
+
+                .review-guest-name {
+                    font-weight: 600;
+                    color: #111827;
+                    font-size: 15px;
+                }
+
+                .review-date {
+                    color: #6b7280;
+                    font-size: 13px;
+                    margin-top: 4px;
+                }
+
+                .review-rating {
+                    display: flex;
+                    gap: 4px;
+                }
+
+                .star {
+                    color: #fbbf24;
+                    font-size: 16px;
+                }
+
+                .review-text {
+                    color: #374151;
+                    line-height: 1.6;
+                    margin-bottom: 16px;
+                    font-size: 14px;
+                }
+
+                .review-categories {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+                    gap: 12px;
+                }
+
+                .category-item {
+                    background: #f9fafb;
+                    padding: 12px;
+                    border-radius: 6px;
+                    border-left: 3px solid #b4e051;
+                }
+
+                .category-name {
+                    font-size: 12px;
+                    color: #6b7280;
+                    margin-bottom: 4px;
+                }
+
+                .category-rating {
+                    display: flex;
+                    gap: 3px;
+                    font-size: 14px;
+                }
+
+                .empty-reviews {
+                    text-align: center;
+                    padding: 48px 24px;
+                    color: #6b7280;
                 }
             `}</style>
 
@@ -230,6 +354,126 @@ export default async function PropertyDetail({ params }: { params: { id: string 
                 ) : (
                     <div className="mb-8 bg-gray-100 h-96 rounded flex items-center justify-center">
                         <p className="text-gray-500">No images available</p>
+                    </div>
+                )}
+
+                {/* Description Section */}
+                {listing.description && (
+                    <div className="mb-8 bg-white p-6 rounded-lg border border-gray-200">
+                        <h2 className="section-title text-2xl">Description</h2>
+                        <p className="description-text">{listing.description}</p>
+                    </div>
+                )}
+
+                {/* Amenities Section */}
+                {filteredAmenities.length > 0 && (
+                    <div className="mb-8">
+                        <h2 className="section-title text-2xl">Équipements</h2>
+                        <div className="bg-white p-6 rounded-lg border border-gray-200">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                                {filteredAmenities.map((amenity) => (
+                                    <div key={amenity.id} className="amenity-item">
+                                        <svg
+                                            className="amenity-icon"
+                                            viewBox="0 0 24 24"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            strokeWidth="2"
+                                        >
+                                            <circle cx="12" cy="12" r="10" />
+                                            <path d="M8 14s1.5 2 4 2 4-2 4-2" />
+                                            <line x1="9" y1="9" x2="9.01" y2="9" />
+                                            <line x1="15" y1="9" x2="15.01" y2="9" />
+                                        </svg>
+                                        <span className="text-sm text-gray-700 font-medium">
+                                            {amenity.amenityName}
+                                        </span>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Map Section */}
+                {listing.lat && listing.lng && (
+                    <div className="mb-8">
+                        <h2 className="section-title text-2xl">Emplacement</h2>
+                        <PropertyMap
+                            lat={listing.lat}
+                            lng={listing.lng}
+                            propertyName={listing.name}
+                        />
+                    </div>
+                )}
+
+                {/* House Rules Section */}
+                {listing.houseRules && (
+                    <div className="mb-8 bg-white p-6 rounded-lg border border-gray-200">
+                        <h2 className="section-title text-2xl">House Rules</h2>
+                        <p className="text-gray-700 leading-relaxed">{listing.houseRules}</p>
+                    </div>
+                )}
+
+                {/* Reviews Section */}
+                {reviews && reviews.length > 0 ? (
+                    <div className="mb-8">
+                        <h2 className="section-title text-2xl">Reviews ({reviews.length})</h2>
+                        <div className="review-container">
+                            {reviews.map((review) => (
+                                <div key={review.id} className="review-card">
+                                    <div className="review-header">
+                                        <div className="review-author">
+                                            <div className="review-guest-name">{review.guestName}</div>
+                                            <div className="review-date">
+                                                {new Date(review.submittedAt).toLocaleDateString('fr-FR', {
+                                                    year: 'numeric',
+                                                    month: 'long',
+                                                    day: 'numeric'
+                                                })}
+                                            </div>
+                                        </div>
+                                        {review.rating && (
+                                            <div className="review-rating">
+                                                {[...Array(5)].map((_, i) => (
+                                                    <span key={i} className="star">
+                                                        {i < review.rating! ? '★' : '☆'}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {review.publicReview && (
+                                        <p className="review-text">{review.publicReview}</p>
+                                    )}
+
+                                    {review.reviewCategory && review.reviewCategory.length > 0 && (
+                                        <div className="review-categories">
+                                            {review.reviewCategory.map((category, idx) => (
+                                                <div key={idx} className="category-item">
+                                                    <div className="category-name">{category.category}</div>
+                                                    <div className="category-rating">
+                                                        {[...Array(5)].map((_, i) => (
+                                                            <span key={i} className="star">
+                                                                {i < category.rating ? '★' : '☆'}
+                                                            </span>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                ) : (
+                    <div className="mb-8 bg-white p-6 rounded-lg border border-gray-200">
+                        <h2 className="section-title text-2xl">Avis</h2>
+                        <div className="empty-reviews">
+                            <p>Aucun avis pour le moment</p>
+                        </div>
                     </div>
                 )}
             </div>

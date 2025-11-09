@@ -44,6 +44,40 @@ class ReviewService {
     }
 
     /**
+     * Fetch the count of reviews for a specific listing ID.
+     * @param listingId - The ID of the listing whose review count is to be fetched.
+     * @param publishedOnly - Whether to count only published reviews.
+     * @returns A promise that resolves to the count of reviews.
+     */
+    async fetchReviewsCountByListingId(listingId: string, publishedOnly: boolean = true): Promise<number> {
+        const count: number = await prisma.review.count({
+            where: {
+                listingId: parseInt(listingId),
+                ...(publishedOnly && { isPublished: true }),
+            },
+        });
+        return count;
+    }
+
+    /**
+     * Fetch the average rating for a specific listing ID.
+     * @param listingId - The ID of the listing whose average rating is to be fetched.
+     * @returns A promise that resolves to the average rating.
+     */
+    async fetchAverageRatingByListingId(listingId: string): Promise<number> {
+        const result: any = await prisma.review.aggregate({
+            where: {
+                listingId: parseInt(listingId),
+                isPublished: true,
+            },
+            _avg: {
+                rating: true,
+            },
+        });
+        return result._avg.rating || 0;
+    }
+
+    /**
      * Fetch a review by its ID.
      * @param reviewId - The ID of the review to be fetched.
      * @returns A promise that resolves to the Review object if found, or null if not found.

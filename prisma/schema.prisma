@@ -43,9 +43,26 @@ model Review {
   
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
+
+  googleReviewUid String?     @unique // A hash uniquely generated to synchronize (in case Places_API is used)
 }
 
 enum ReviewType {
   HOST_TO_GUEST
   GUEST_TO_HOST
+}
+
+model ListingPlaceMapping {
+  id            Int      @id @default(autoincrement())
+  listingId     Int      @unique // Hostaway listing ID (one-to-one)
+  googlePlaceId String   // Google Places API place_id
+  
+  // Optional metadata
+  listingName   String?  // Store for reference/debugging
+  placeName     String?  // Store for reference/debugging
+  
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  @@index([googlePlaceId])
 }
