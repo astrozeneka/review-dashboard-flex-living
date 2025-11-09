@@ -26,6 +26,8 @@ export default function Dashboard() {
     const [selectedListing, setSelectedListing] = useState<any>(null);
     const [isListingModalOpen, setIsListingModalOpen] = useState(false);
     const [reviews, setReviews] = useState<Review[]>([]);
+    const [reviewOffset, setReviewOffset] = useState(0);
+    const reviewPageSize = 12;
     const [filteredReviews, setFilteredReviews] = useState<Review[]>([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedReview, setSelectedReview] = useState<Review | null>(null);
@@ -69,7 +71,6 @@ export default function Dashboard() {
                 // Load reviews
                 try {
                     const hostawayReviewsResponse = await fetchHostawayReviews();
-                    console.log("Hostaway Reviews Response:", hostawayReviewsResponse);
                     setReviews(hostawayReviewsResponse.result);
                 } catch (error) {
                     // Error will be managed here
@@ -137,6 +138,46 @@ export default function Dashboard() {
 
         setFilteredReviews(result);
     }, [reviews, filters]);
+
+    // Function to load more reviews for pagination
+    const loadReviews = async (offset: number, limit: number, token: string) => {
+        console.log("Token:", token);
+        if (!token) return;
+        setIsReviewLoading(true);
+        console.log("Loading more reviews:", offset, limit);
+        try {
+            const response = fetchHostawayReviews(offset, limit);
+            const data = await response;
+            console.log("Fetched Reviews:", data.result.length);
+            setReviews((prevReviews) => [...prevReviews, ...data.result]);
+        } catch (error) {
+            console.error("Error fetching more reviews:", error);
+        } finally {
+            setIsReviewLoading(false);
+        }
+    }
+
+    // Keep track of the scroll status to manage pagination
+    useEffect(() => {
+        if (!token) return;
+
+        const handleScroll = () => {
+            const scrollTop = window.scrollY;
+            const docHeight = document.documentElement.scrollHeight;
+            const winHeight = window.innerHeight;
+            const remainingScroll = docHeight - (scrollTop + winHeight);
+            console.log("Remaining Scroll:", remainingScroll);
+            if (remainingScroll < 100 && !isReviewLoading) {
+                // User is near the bottom of the page
+                setReviewOffset((prevOffset) => prevOffset + reviewPageSize);
+                loadReviews(reviewOffset + reviewPageSize, reviewPageSize, token);
+            }
+        };
+
+        window.addEventListener('scroll', handleScroll);
+
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, [token, reviewOffset, isReviewLoading]);
 
     const handleSearch = async (query: string) => {
         setSearchQuery(query);
@@ -288,9 +329,7 @@ export default function Dashboard() {
                 <h2 className="text-2xl font-bold mb-4">Reviews</h2>
                 <FilterBar listings={listings} onFilterChange={setFilters} />
 
-                {isReviewLoading ? (
-                    <ReviewsLoadingSkeleton count={6} />
-                ) : filteredReviews.length === 0 ? (
+                {(filteredReviews.length === 0 && !isReviewLoading) ? (
                     <div className="bg-white rounded-lg shadow-sm p-12 text-center mt-6">
                         <svg className="w-16 h-16 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
@@ -316,6 +355,10 @@ export default function Dashboard() {
                         ))}
                     </div>
                 )}
+
+                {isReviewLoading ? (
+                    <ReviewsLoadingSkeleton count={6} />
+                ) : <></>}
             </div>
 
             {/* Toast Container */}

@@ -6,7 +6,7 @@ import { useAuth } from "./AuthContext";
 import { Property } from "../types/property";
 
 interface ApiContextType {
-    fetchHostawayReviews: () => Promise<{status: string; result: Review[]}>;
+    fetchHostawayReviews: (offset?: number, limit?: number) => Promise<{status: string; result: Review[]}>;
     approveHostawayReview: (reviewId: number) => Promise<{status: string, message: string, result: Review|null, listingStats?: ReviewStatistics}>;
     fetchListingDetailsById: (listingId: string) => Promise<{status: string, result: Property, stats: ReviewStatistics}>;
 }
@@ -32,8 +32,8 @@ export const ApiProvider = ({ children }: ApiProviderProps) => {
      * Fetch Hostaway Reviews from the API
      * @returns A promise that resolves to an object containing status and result (array of reviews)
      */
-    const fetchHostawayReviews = async (): Promise<{status: string; result: Review[]}> => {
-        const response = await fetch('/api/reviews/hostaway', {
+    const fetchHostawayReviews = async (offset?: number, limit?: number): Promise<{status: string; result: Review[]}> => {
+        const response = await fetch(`/api/reviews/hostaway?offset=${offset || 0}&limit=${limit || 20}`, {
             headers: {
                 'Authorization': `Bearer ${token}`,
             },

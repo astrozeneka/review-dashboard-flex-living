@@ -11,11 +11,16 @@ class ReviewService {
      * Fetch all reviews from the database.
      * @returns A promise that resolves to an array of Review objects.
      */
-    async fetchReviews(): Promise<Review[]> {
+    async fetchReviews(offset?: number, limit?: number): Promise<Review[]> {
+        if (offset === undefined) offset = 0;
+        if (limit === undefined) limit = 12;
+
         const reviews: any[]= await prisma.review.findMany({
             orderBy: {
                 createdAt: 'desc',
             },
+            skip: offset,
+            take: limit,
         });
         // Parse the review category
         reviews.forEach(review => {
