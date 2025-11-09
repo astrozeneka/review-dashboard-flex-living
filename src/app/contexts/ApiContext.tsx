@@ -1,12 +1,12 @@
 "use client";
 
 import { createContext, useContext } from "react";
-import { Review, ReviewStatistics } from "../types/review";
+import { Review, ReviewStatistics, SortingCriteria } from "../types/review";
 import { useAuth } from "./AuthContext";
 import { Property } from "../types/property";
 
 interface ApiContextType {
-    fetchHostawayReviews: (offset?: number, limit?: number, status?: 'all' | 'published' | 'unpublished') => Promise<{status: string; result: Review[], hasMore: boolean}>;
+    fetchHostawayReviews: (offset?: number, limit?: number, status?: 'all' | 'published' | 'unpublished', channel?: string, propertyName?: string, rating?: number, sortingCriteria?: SortingCriteria) => Promise<{status: string; result: Review[], hasMore: boolean}>;
     approveHostawayReview: (reviewId: number) => Promise<{status: string, message: string, result: Review|null, listingStats?: ReviewStatistics}>;
     fetchListingDetailsById: (listingId: string) => Promise<{status: string, result: Property, stats: ReviewStatistics}>;
 }
@@ -32,8 +32,8 @@ export const ApiProvider = ({ children }: ApiProviderProps) => {
      * Fetch Hostaway Reviews from the API
      * @returns A promise that resolves to an object containing status and result (array of reviews)
      */
-    const fetchHostawayReviews = async (offset?: number, limit?: number, status?: 'all' | 'published' | 'unpublished'): Promise<{status: string; result: Review[], hasMore: boolean}> => {
-        const response = await fetch(`/api/reviews/hostaway?offset=${offset || 0}&limit=${limit || 20}&status=${status || 'all'}`, {
+    const fetchHostawayReviews = async (offset?: number, limit?: number, status?: 'all' | 'published' | 'unpublished', channel?: string, propertyName?: string, rating?: number, sortingCriteria?: SortingCriteria): Promise<{status: string; result: Review[], hasMore: boolean}> => {
+        const response = await fetch(`/api/reviews/hostaway?offset=${offset || 0}&limit=${limit || 20}&status=${status || 'all'}&channel=${channel || 'all'}&propertyName=${propertyName || ''}&rating=${rating || 0}&sortingCriteria=${sortingCriteria || 'date_desc'}`, {
             headers: {
                 'Authorization': `Bearer ${token}`,
             },

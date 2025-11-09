@@ -35,3 +35,5 @@ export interface StarCount {
   "8": number
   "10": number
 }
+
+export type SortingCriteria = 'date_asc' | 'date_desc' | 'rating_asc' | 'rating_desc';

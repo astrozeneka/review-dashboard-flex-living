@@ -3,7 +3,7 @@
 import { useAuth } from '@/app/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { Review } from '../types/review';
+import { Review, SortingCriteria } from '../types/review';
 import { useApi } from '../contexts/ApiContext';
 import DetailModal from '../components/DetailModal';
 import ReviewApprovalForm from '../components/ReviewApprovalForm';
@@ -30,6 +30,7 @@ export default function Dashboard() {
     const [reviewOffset, setReviewOffset] = useState(0);
     const [hasMoreReviews, setHasMoreReviews] = useState(true);
     const reviewPageSize = 12;
+    const [channels, setChannels] = useState<string[]>([]);
     const [filteredReviews, setFilteredReviews] = useState<Review[]>([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedReview, setSelectedReview] = useState<Review | null>(null);
@@ -151,22 +152,40 @@ export default function Dashboard() {
         // setReviews([]);
     }, [reviews]);
 
+    //  Load list of channels for filter bar
+    useEffect(() => {
+        const loadChannels = async () => {
+            try {
+                const response = await fetch('/api/reviews/hostaway/channels');
+                if (response.ok) {
+                    const data = await response.json();
+                    // Set channels in filter bar
+                    setChannels(data.channels);
+                };
+            } catch (error) {
+                console.error("Error fetching channels:", error);
+            }
+        };
+        loadChannels();
+    }, []);
+
+    // Reload reviews when filters change
     useEffect(() => {
         setFilteredReviews(reviews);
         // If 'status' filter is applied
         setReviews([]);
-        loadReviews(0, reviewPageSize, token!, filters.status);
+        loadReviews(0, reviewPageSize, token!, filters.status, filters.channel, filters.property, parseInt(filters.rating), filters.sort as SortingCriteria);
         console.log("Filters changed, reloading reviews:", filters);
 
     }, [filters]);
 
     // Function to load more reviews for pagination
-    const loadReviews = async (offset: number, limit: number, token: string, status: 'all' | 'published' | 'unpublished') => {
+    const loadReviews = async (offset: number, limit: number, token: string, status: 'all' | 'published' | 'unpublished', channel: string = 'all', propertyName: string = '', rating: number | undefined = undefined, sortingCriteria: SortingCriteria = 'date_desc') => {
         if (!token) return;
         setIsReviewLoading(true);
         console.log("Loading more reviews:", offset, limit);
         try {
-            const response = fetchHostawayReviews(offset, limit, status);
+            const response = fetchHostawayReviews(offset, limit, status, channel, propertyName, rating, sortingCriteria);
             const data = await response;
             console.log("Fetched Reviews:", data.result.length);
             setReviews((prevReviews) => [...prevReviews, ...data.result]);
@@ -232,12 +251,6 @@ export default function Dashboard() {
             <div className="flex justify-between items-center mb-8">
                 <h1 className="text-3xl font-bold">Hello {(user as any)?.name || ''}</h1>
                 <div className="flex gap-4">
-                    <button
-                        onClick={() => setIsModalOpen(true)}
-                        className="px-6 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-                    >
-                        View Details
-                    </button>
                     <button
                         onClick={handleLogout}
                         className="px-6 py-2 bg-red-500 text-white rounded hover:bg-red-600"
@@ -350,7 +363,7 @@ export default function Dashboard() {
             {/* Reviews Section */}
             <div className="mt-12">
                 <h2 className="text-2xl font-bold mb-4">Reviews</h2>
-                <FilterBar listings={listings} onFilterChange={setFilters} />
+                <FilterBar listings={listings} onFilterChange={setFilters} channelOptions={channels} />
 
                 {(filteredReviews.length === 0 && !isReviewLoading) ? (
                     <div className="bg-white rounded-lg shadow-sm p-12 text-center mt-6">

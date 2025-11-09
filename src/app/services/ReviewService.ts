@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { Review, ReviewStatistics, StarCount } from "../types/review";
+import { Review, ReviewStatistics, StarCount, SortingCriteria } from "../types/review";
 
 /**
  * Service class for managing reviews.
@@ -11,17 +11,32 @@ class ReviewService {
      * Fetch all reviews from the database.
      * @returns A promise that resolves to an array of Review objects.
      */
-    async fetchReviews(offset?: number, limit?: number, isPublished?: boolean): Promise<Review[]> {
+    async fetchReviews(offset?: number, limit?: number, isPublished?: boolean, channel?: string, propertyName?: string, rating?: number, sortingCriteria?: SortingCriteria): Promise<Review[]> {
         if (offset === undefined) offset = 0;
         if (limit === undefined) limit = 12;
 
+        // Rating ranges from 0 to 5 but the database stores from 0 to 10
+        let ratingMin, ratingMax;
+        if (rating !== undefined) {
+            ratingMin = rating * 2 - 2;
+            ratingMax = ratingMin + 2;
+        }
+
         const reviews: any[]= await prisma.review.findMany({
             orderBy: {
-                submittedAt: 'desc',
+                ...(sortingCriteria === 'date_asc' && { submittedAt: 'asc' }),
+                ...(sortingCriteria === 'date_desc' && { submittedAt: 'desc' }),
+                ...(sortingCriteria === 'rating_asc' && { rating: 'asc' }),
+                ...(sortingCriteria === 'rating_desc' && { rating: 'desc' }),
             },
             skip: offset,
             take: limit,
-            ...(isPublished !== undefined && { where: { isPublished } })
+            where: {
+                ...(isPublished !== undefined && { isPublished }),
+                ...(channel !== 'all' && { channel }),
+                ...((propertyName !== undefined && propertyName !== 'all') && { listingName: propertyName }),
+                ...(rating !== undefined && { rating: { gt: ratingMin, lte: ratingMax } }),
+            },
         });
 
         // Parse the review category
@@ -218,6 +233,20 @@ class ReviewService {
             updatedReview.reviewCategory = JSON.parse(updatedReview.reviewCategory);
         }
         return updatedReview as Review | null;
+    }
+
+    /**
+     * Fetch distinct review channels.
+     * @returns A promise that resolves to an array of distinct channel names.
+     */
+    async fetchChannels(): Promise<string[]> {
+        const channels: any[] = await prisma.review.findMany({
+            distinct: ['channel'],
+            select: {
+                channel: true,
+            },
+        });
+        return channels.map(c => c.channel);
     }
 }
 // Singleton instance
