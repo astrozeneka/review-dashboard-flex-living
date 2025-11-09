@@ -38,6 +38,7 @@ export default function LoginPage() {
         return Object.keys(errors).length === 0;
     }, [email, password, isValidEmail]);
 
+    // Handle form submission
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError('');

@@ -15,6 +15,11 @@ interface ToastProps {
     onClose: (id: string) => void;
 }
 
+/**
+ * Renders a toast notification with auto-dismiss functionality.
+ * @param param0 
+ * @returns JSX element representing the toast notification.
+ */
 export default function Toast({ toast, onClose }: ToastProps) {
     useEffect(() => {
         const timer = setTimeout(() => {

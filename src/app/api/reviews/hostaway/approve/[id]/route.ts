@@ -3,7 +3,13 @@ import { AuthenticatedRequest, withAuth } from "@/lib/authMiddleware";
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 
-
+/**
+ * Approves a review by its ID.
+ * Requires authentication.
+ * @param request 
+ * @param param1 
+ * @returns JSON response indicating the approval result.
+ */
 export const POST = withAuth(async function handler(request: AuthenticatedRequest, { params }: { params: { id: string } }) {
     
     const reviewId = parseInt(params.id, 10);

@@ -7,9 +7,6 @@ export const dynamic = 'force-dynamic';
 const HOSTAWAY_API_BASE = process.env.HOSTAWAY_API_BASE;
 const HOSTAWAY_API_KEY = process.env.HOSTAWAY_API_KEY;
 
-
-
-// TODO: MOVE TO A SERVICE FILE (after the brainstorming + prototyping phase)
 interface HostawayListing {
     id: number;
     name: string;
@@ -25,6 +22,11 @@ interface HostawayListingsResponse {
     result: HostawayListing[];
 }
 
+/**
+ * Fetches a list of listings from the Hostaway API, optionally filtered by query parameters.
+ * @param request 
+ * @returns JSON response containing the listings.
+ */
 export const GET = async function handler(request: NextRequest) {
     try {
         // TODO Next, search and pagination

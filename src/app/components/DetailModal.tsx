@@ -1,4 +1,9 @@
 
+/**
+ * DetailModal Component, a reusable modal for displaying detailed information in a popup.
+ * @param param0 
+ * @returns 
+ */
 export default function DetailModal({ isOpen, onClose, children, title = "Review Details" }: { isOpen: boolean; onClose: () => void; children: React.ReactNode; title?: string }) {
     if (!isOpen) return null;
 

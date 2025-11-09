@@ -10,6 +10,11 @@ export interface AuthenticatedRequest extends NextRequest {
   };
 }
 
+/**
+ * Middleware to protect routes and ensure the user is authenticated.
+ * @param handler 
+ * @returns A function that handles authenticated requests.
+ */
 export const withAuth = (handler: (request: AuthenticatedRequest, context?: any) => Promise<NextResponse>) => {
   return async (request: NextRequest, context?: any) => {
     try {

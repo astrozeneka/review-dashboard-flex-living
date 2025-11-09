@@ -1,5 +1,10 @@
 'use client';
 
+/**
+ * Renders a skeleton loader for a listing row in the listings table.
+ * Used while the actual listing data is being fetched.
+ * @returns JSX element representing the skeleton loader.
+ */
 export default function ListingRowSkeleton() {
     return (
         <tr className="hover:bg-gray-50 transition-colors">

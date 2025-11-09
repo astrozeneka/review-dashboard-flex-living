@@ -80,6 +80,11 @@ function formatDate(dateString: string): string {
     });
 }
 
+/**
+ * Renders a card component displaying a summary of a review with action buttons.
+ * @param param0 
+ * @returns JSX element representing the review card.
+ */
 export default function ReviewCard({ review, onViewDetails, onApprove }: ReviewCardProps) {
     return (
         <div className="bg-white rounded-lg shadow-sm p-6 hover:shadow-md transition-shadow">

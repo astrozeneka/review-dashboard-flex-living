@@ -1,11 +1,24 @@
-import Image from "next/image";
-import Counter from "./components/counter";
+"use client";
+
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";  // ← Correct import for App Router
 
 export default function Home() {
+  const router = useRouter();
+  const isLoggedIn = false;
+
+  useEffect(() => {
+    if (!isLoggedIn) {
+      router.push("/login");
+    }
+  }, [isLoggedIn, router]);  // ← Runs only in browser, not during build
+
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      Hello world <br/>
-      <Counter />
-    </div>
+    <main className="flex min-h-screen flex-col items-center justify-between p-24">
+      <p>Go to the dashboard</p>
+      <a href="/dashboard" className="text-blue-500 underline">
+        Dashboard
+      </a>
+    </main>
   );
 }

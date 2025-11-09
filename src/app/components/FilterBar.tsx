@@ -17,6 +17,11 @@ export interface FilterState {
     sort: string;
 }
 
+/**
+ * Renders a filter bar component for filtering and sorting reviews.
+ * @param param0 
+ * @returns JSX element representing the filter bar.
+ */
 export default function FilterBar({ listings, onFilterChange, channelOptions }: FilterBarProps) {
     const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const { name, value } = e.target;

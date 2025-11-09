@@ -5,6 +5,11 @@ import { commonAmenities } from "@/app/utils/amenityIcons";
 import { Review } from "@/app/types/review";
 import { reviewService } from "@/app/services/ReviewService";
 
+/**
+ * Server-side component that renders the property detail page.
+ * @param param0 
+ * @returns 
+ */
 export default async function PropertyDetail({ params }: { params: { id: string } }) {
     const listing: Property | null = await listingService.fetchListingById(params.id);
     const reviews: Review[] | null = await reviewService.fetchReviewsByListingId(params.id);

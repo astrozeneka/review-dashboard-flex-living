@@ -96,7 +96,12 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         }
     };
 
-    // The login function (used by context consumers)
+    /**
+     * The login function (used by context consumers)
+     * @param email - User's email
+     * @param password - User's password
+     * @returns A promise that resolves to an object indicating success or failure
+     */
     const login = async (email: string, password: string): Promise<{ success: boolean; error?: string }> => {
         setLoading(true);
         try {
@@ -178,7 +183,10 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         }
     };
 
-    // The logout function (used by context consumers)
+    /**
+     * The logout function (used by context consumers)
+     * This will clear user data from state and localStorage
+     */
     const logout = () => {
         setUser(null);
         setToken(null);

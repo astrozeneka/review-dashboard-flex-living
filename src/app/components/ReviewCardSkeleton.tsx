@@ -1,5 +1,9 @@
 'use client';
 
+/**
+ * Renders a skeleton loader for a review card while the actual review data is being fetched.
+ * @returns JSX element representing the review card skeleton.
+ */
 export default function ReviewCardSkeleton() {
     return (
         <div className="bg-white rounded-lg shadow-sm p-6">

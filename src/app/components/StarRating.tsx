@@ -1,5 +1,10 @@
 
 
+/**
+ * Renders a star rating component based on the given rating value.
+ * @param param0 
+ * @returns JSX element representing the star rating.
+ */
 export function StarRating({ rating }: { rating: number }) {
     const fullStars = Math.floor(rating);
     const halfStar = rating - fullStars >= 0.5 ? 1 : 0;

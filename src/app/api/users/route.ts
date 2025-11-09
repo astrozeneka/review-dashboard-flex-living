@@ -2,6 +2,13 @@ import { prisma } from '@/lib/prisma'
 import { NextResponse } from 'next/server'
 import { hashPassword, generateToken } from "@/lib/auth";
 
+/**
+ * Handles user registration requests.
+ * Expects a JSON body with 'email', 'name', and 'password'.
+ * Validates input, creates a new user, and returns an auth token on success.
+ * @param request 
+ * @returns JSON response containing the new user data and auth token.
+ */
 export async function POST(request: Request) {
     const { email, name, password } = await request.json()
 

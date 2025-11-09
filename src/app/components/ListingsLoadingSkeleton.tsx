@@ -6,6 +6,11 @@ interface ListingsLoadingSkeletonProps {
     count?: number;
 }
 
+/**
+ * Renders a loading skeleton for the listings table while data is being fetched.
+ * @param param0 
+ * @returns JSX element representing the loading skeleton.
+ */
 export default function ListingsLoadingSkeleton({ count = 5 }: ListingsLoadingSkeletonProps) {
     return (
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Review, ReviewStatistics } from '../types/review';
 import { useApi } from '../contexts/ApiContext';
 import { StarRating } from './StarRating';
@@ -36,9 +36,22 @@ function formatDate(dateString: string): string {
     });
 }
 
+/**
+ * Renders a form for approving or rejecting a review with detailed information.
+ * @param param0 
+ * @returns JSX element representing the review approval form.
+ */
 export default function ReviewApprovalForm({ review, onClose, onReviewUpdated }: ReviewApprovalFormProps) {
     const [isLoading, setIsLoading] = useState(false);
     const {approveHostawayReview} = useApi();
+
+    // Disable body scroll when modal is open
+    useEffect(() => {
+        document.body.style.overflow = 'hidden';
+        return () => {
+            document.body.style.overflow = 'unset';
+        };
+    }, []);
 
     const handleApproval = async (action: 'approve' | 'reject') => {
         setIsLoading(true);

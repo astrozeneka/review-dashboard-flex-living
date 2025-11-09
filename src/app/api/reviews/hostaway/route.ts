@@ -7,6 +7,12 @@ import { off } from "process";
 
 export const dynamic = 'force-dynamic';
 
+/**
+ * Fetches a list of reviews with optional filtering, pagination, and sorting.
+ * Requires authentication.
+ * @param request 
+ * @returns JSON response containing the reviews.
+ */
 export const GET = withAuth(async function handler(request: AuthenticatedRequest) {
     const { searchParams } = new URL(request.url);
     const offset = parseInt(searchParams.get('offset') || '0', 10);

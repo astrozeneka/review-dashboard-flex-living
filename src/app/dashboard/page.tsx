@@ -93,63 +93,8 @@ export default function Dashboard() {
 
     // Filter and sort reviews
     useEffect(() => {
-        /*let result = [...reviews];
-
-        // Apply status filter
-        if (filters.status !== 'all') {
-            result = result.filter(r => {
-                const status = r.isPublished ? 'approved' : 'pending';
-                return status === filters.status;
-            });
-        }
-
-        // Apply property filter
-        if (filters.property !== 'all') {
-            result = result.filter(r => r.listingName === filters.property);
-        }
-
-        // Apply channel filter
-        if (filters.channel !== 'all') {
-            result = result.filter(r => r.channel === filters.channel);
-        }
-
-        // Apply topic filter
-        if (filters.topic !== 'all') {
-            result = result.filter(r => {
-                if (!r.reviewCategory) return false;
-                return r.reviewCategory.some(cat => cat.category === filters.topic);
-            });
-        }
-
-        // Apply rating filter
-        if (filters.rating !== 'all') {
-            const minRating = parseFloat(filters.rating);
-            result = result.filter(r => (r.rating || 0) >= minRating);
-        }
-
-        // Apply sorting
-        result.sort((a, b) => {
-            switch (filters.sort) {
-                case 'date-desc':
-                    return new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime();
-                case 'date-asc':
-                    return new Date(a.submittedAt).getTime() - new Date(b.submittedAt).getTime();
-                case 'rating-desc':
-                    return (b.rating || 0) - (a.rating || 0);
-                case 'rating-asc':
-                    return (a.rating || 0) - (b.rating || 0);
-                default:
-                    return 0;
-            }
-        });
-
-        setFilteredReviews(result);*/
-
-        // console.log("Applying filters:", filters);
-
-        // Clear reviews
+        // Just map reviews to filteredReviews
         setFilteredReviews(reviews);
-        // setReviews([]);
     }, [reviews]);
 
     //  Load list of channels for filter bar
@@ -224,6 +169,7 @@ export default function Dashboard() {
         return () => window.removeEventListener('scroll', handleScroll);
     }, [token, reviewOffset, isReviewLoading, filters.status]);
 
+    // Handle search input
     const handleSearch = async (query: string) => {
         setSearchQuery(query);
         if (!query.trim()) {
@@ -241,6 +187,7 @@ export default function Dashboard() {
         }
     };
 
+    // Handle logout button click
     const handleLogout = async (e: React.MouseEvent) => {
         e.preventDefault();
         logout();

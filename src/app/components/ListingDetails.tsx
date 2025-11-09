@@ -11,6 +11,11 @@ interface ListingDetailsProps {
     onClose?: () => void;
 }
 
+/**
+ * Renders detailed information about a listing, including statistics and recurring issues.
+ * @param param0 
+ * @returns JSX element representing the listing details.
+ */
 export default function ListingDetails({ listing, onClose }: ListingDetailsProps) {
     const { fetchListingDetailsById } = useApi();
     const [stats, setStats] = useState<ReviewStatistics | null>(null);
@@ -34,6 +39,14 @@ export default function ListingDetails({ listing, onClose }: ListingDetailsProps
         };
         fetchData();
     }, [listing, fetchListingDetailsById]);
+
+    // Disable body scroll when modal is open
+    useEffect(() => {
+        document.body.style.overflow = 'hidden';
+        return () => {
+            document.body.style.overflow = 'unset';
+        };
+    }, []);
 
     if (!listing) return <></>;
 

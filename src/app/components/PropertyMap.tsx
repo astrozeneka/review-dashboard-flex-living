@@ -10,6 +10,11 @@ interface PropertyMapProps {
     propertyName: string;
 }
 
+/**
+ * Renders an interactive map centered on the given latitude and longitude with a marker for the property.
+ * @param param0 
+ * @returns JSX element representing the property map.
+ */
 export function PropertyMap({ lat, lng, propertyName }: PropertyMapProps) {
     useEffect(() => {
         const mapContainer = document.getElementById('property-map');

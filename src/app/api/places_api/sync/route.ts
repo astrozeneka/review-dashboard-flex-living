@@ -11,6 +11,12 @@ function generateReviewId(googleReview: GoogleReview) {
   return createHash('sha256').update(uniqueString).digest('hex');
 }
 
+/**
+ * Synchronizes Listing-Place mappings and fetches Google reviews for each place.
+ * Requires authentication.
+ * @param request 
+ * @returns JSON response indicating the synchronization result.
+ */
 export const POST = withAuth(async function handler(request: Request) {
     // Get list of ListingPlaceMapping from prisma
     const mappings: ListingPlaceMapping[] = await prisma.listingPlaceMapping.findMany();

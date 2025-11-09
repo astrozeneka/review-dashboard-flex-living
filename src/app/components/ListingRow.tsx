@@ -13,6 +13,11 @@ interface ListingRowProps {
     onTriggerReviewFilter?: (listing: any) => void;
 }
 
+/**
+ * Renders a single row in the listings (property) table with details and action buttons.
+ * @param param0 
+ * @returns JSX element representing a listing row.
+ */
 export default function ListingRow({ listing, onViewDetails, onTriggerReviewFilter }: ListingRowProps) {
     return (
         <tr className="hover:bg-gray-50 transition-colors">

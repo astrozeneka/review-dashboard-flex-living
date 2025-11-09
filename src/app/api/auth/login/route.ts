@@ -2,7 +2,11 @@ import { comparePassword, generateToken } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
 
-
+/**
+ * Handles user login requests.
+ * Expects a JSON body with 'email' and 'password'.
+ * Validates credentials and returns an auth token on success.
+ */
 export async function POST(request: NextRequest) {
     try {
         const { email, password } = await request.json();

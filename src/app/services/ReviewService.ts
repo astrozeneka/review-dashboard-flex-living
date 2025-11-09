@@ -98,6 +98,11 @@ class ReviewService {
         return count;
     }
 
+    /**
+     * Fetch review statistics for a specific listing ID.
+     * @param listingId - The ID of the listing whose review statistics are to be fetched.
+     * @returns A promise that resolves to the ReviewStatistics object.
+     */
     async fetchReviewStatsByListingId(listingId: string): Promise<ReviewStatistics> {
         // Last trimester average
         const threeMonthsAgo = new Date();
