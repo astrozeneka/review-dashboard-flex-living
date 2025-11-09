@@ -9,8 +9,8 @@ export function middleware(request: NextRequest) {
     // Redirect unauthenticated users from protected routes to /login
     if (
       pathname === '/' ||
-      pathname === '/dashboard' ||
-      pathname.startsWith('/property')
+      pathname === '/dashboard' // ||
+      // pathname.startsWith('/property')
     ) {
       return NextResponse.redirect(new URL('/login', request.url));
     }
