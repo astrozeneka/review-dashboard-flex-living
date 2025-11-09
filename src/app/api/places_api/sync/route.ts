@@ -4,6 +4,7 @@ import { withAuth } from "@/lib/authMiddleware";
 import { prisma } from "@/lib/prisma";
 import { ReviewType } from "@prisma/client";
 import { createHash } from 'crypto';
+import { NextResponse } from "next/server";
 
 function generateReviewId(googleReview: GoogleReview) {
   const uniqueString = `${googleReview.author_name}-${googleReview.time}`;
@@ -59,14 +60,9 @@ export const POST = withAuth(async function handler(request: Request) {
         }
     });
 
-    return new Response(JSON.stringify({
+    return NextResponse.json({
         status: 'success',
         message: 'Listing-Place mappings synchronized and reviews fetched',
         result: mappings
-    }), {
-        status: 200,
-        headers: {
-            'Content-Type': 'application/json'
-        }
     });
 });

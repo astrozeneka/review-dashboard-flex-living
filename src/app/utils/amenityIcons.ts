@@ -1,4 +1,4 @@
-export const AmenityIconMap: Record<string, React.ReactNode> = {
+export const AmenityIconMap: Record<string, string> = {
     // Kitchen & Dining
     'Toaster': '<rect x="8" y="3" width="8" height="18" rx="1"/><path d="M10 8h4"/><path d="M10 12h4"/>',
     'Microwave': '<rect x="4" y="4" width="16" height="16" rx="2"/>',

@@ -2,8 +2,8 @@ export interface ListingPlaceMapping {
   id: number
   listingId: number
   googlePlaceId: string
-  listingName?: string
-  placeName?: string
-  createdAt: string
-  updatedAt: string
+  listingName?: string|null
+  placeName?: string|null
+  createdAt: Date
+  updatedAt: Date
 }
