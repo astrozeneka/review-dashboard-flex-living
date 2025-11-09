@@ -11,8 +11,6 @@ interface ListingDetailsProps {
 }
 
 export default function ListingDetails({ listing, onClose }: ListingDetailsProps) {
-    if (!listing) return null;
-
     const { fetchListingDetailsById } = useApi();
     const [stats, setStats] = useState<ReviewStatistics | null>(null);
     const [loading, setLoading] = useState(true);
@@ -32,6 +30,8 @@ export default function ListingDetails({ listing, onClose }: ListingDetailsProps
         };
         fetchData();
     }, [listing, fetchListingDetailsById]);
+
+    if (!listing) return <></>;
 
     return (
         <div className="space-y-4">
