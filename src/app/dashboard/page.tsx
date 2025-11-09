@@ -181,12 +181,15 @@ export default function Dashboard() {
 
     // Function to load more reviews for pagination
     const loadReviews = async (offset: number, limit: number, token: string, status: 'all' | 'published' | 'unpublished', channel: string = 'all', propertyName: string = '', rating: number | undefined = undefined, sortingCriteria: SortingCriteria = 'date_desc') => {
-        if (!token) return;
+        if (!token || isReviewLoading) return;
         setIsReviewLoading(true);
         console.log("Loading more reviews:", offset, limit);
         try {
             const response = fetchHostawayReviews(offset, limit, status, channel, propertyName, rating, sortingCriteria);
             const data = await response;
+            if (offset === 0){
+                setReviews([]);
+            }
             console.log("Fetched Reviews:", data.result.length);
             setReviews((prevReviews) => [...prevReviews, ...data.result]);
             setReviewOffset(offset + limit);
@@ -202,7 +205,7 @@ export default function Dashboard() {
 
     // Keep track of the scroll status to manage pagination
     useEffect(() => {
-        if (!token) return;
+        if (!token || isListingLoading) return;
 
         const handleScroll = () => {
             const scrollTop = window.scrollY;

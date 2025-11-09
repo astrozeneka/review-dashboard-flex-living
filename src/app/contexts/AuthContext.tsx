@@ -77,6 +77,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
                 localStorage.removeItem('token');
                 localStorage.removeItem('refreshToken');
                 localStorage.removeItem('userData');
+                document.cookie = 'token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;';
+                document.cookie = 'refreshToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;';
                 setToken(null);
                 setRefreshToken(null);
             }
@@ -85,6 +87,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
             localStorage.removeItem('token');
             localStorage.removeItem('refreshToken');
             localStorage.removeItem('userData');
+            document.cookie = 'token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;';
+            document.cookie = 'refreshToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;';
             setToken(null);
             setRefreshToken(null);
         } finally {
@@ -112,6 +116,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
                 localStorage.setItem('refreshToken', data.refreshToken);            // Not yet tested
                 localStorage.setItem('userData', JSON.stringify(data.user));        // Not yet tested
                 setUser(data.user);                                                 // Not yet tested
+
+                // Store token in cookie for middleware access
+                document.cookie = `token=${data.token}; path=/; SameSite=Lax`;
+                document.cookie = `refreshToken=${data.refreshToken}; path=/; SameSite=Lax`;
+
                 setLoading(false);
                 return { success: true };                                         // Not yet tested
             } else {
@@ -148,6 +157,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
                 localStorage.setItem('refreshToken', data.refreshToken);            // Not yet tested
                 localStorage.setItem('userData', JSON.stringify(data.user));        // Not yet tested
                 setUser(data.user);
+
+                // Store token in cookie for middleware access
+                document.cookie = `token=${data.token}; path=/; SameSite=Lax`;
+                document.cookie = `refreshToken=${data.refreshToken}; path=/; SameSite=Lax`;
+
                 setLoading(false);
                 return { success: true };
             } else {
@@ -169,10 +183,14 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         setUser(null);
         setToken(null);
         setRefreshToken(null);
-        console.log("Logging out, clearing localStorage");
+        console.log("Logging out, clearing localStorage and cookies");
         localStorage.removeItem('token');
         localStorage.removeItem('refreshToken');
         localStorage.removeItem('userData');
+
+        // Clear cookies
+        document.cookie = 'token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;';
+        document.cookie = 'refreshToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;';
     }
 
   const value = {
