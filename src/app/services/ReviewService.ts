@@ -47,7 +47,6 @@ class ReviewService {
             // Sometimes rating needs to be computed
             if (review.rating === null) {
                 const categories = review.reviewCategory as { category: string; rating: number }[] | null;
-                console.log(categories)
                 const averageRating = categories && categories.length > 0
                     ? categories.reduce((sum, curr) => sum + curr.rating, 0) / categories.length
                     : null;

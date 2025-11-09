@@ -48,7 +48,6 @@ export default function Dashboard() {
 
     // TODO: move this code to a suitable section
     useEffect(() => {
-        console.log("IsReviewLoading:", isReviewLoading);
         if (!token || isReviewLoading) {
             return;
         }
@@ -120,7 +119,6 @@ export default function Dashboard() {
         // If 'status' filter is applied
         setReviews([]);
         loadReviews(0, reviewPageSize, token!, filters.status, filters.channel, filters.property, parseInt(filters.rating), filters.sort as SortingCriteria);
-        console.log("Filters changed, reloading reviews:", filters);
 
     }, [filters]);
 
@@ -128,14 +126,12 @@ export default function Dashboard() {
     const loadReviews = async (offset: number, limit: number, token: string, status: 'all' | 'published' | 'unpublished', channel: string = 'all', propertyName: string = '', rating: number | undefined = undefined, sortingCriteria: SortingCriteria = 'date_desc') => {
         if (!token || isReviewLoading) return;
         setIsReviewLoading(true);
-        console.log("Loading more reviews:", offset, limit);
         try {
             const response = fetchHostawayReviews(offset, limit, status, channel, propertyName, rating, sortingCriteria);
             const data = await response;
             if (offset === 0){
                 setReviews([]);
             }
-            console.log("Fetched Reviews:", data.result.length);
             setReviews((prevReviews) => [...prevReviews, ...data.result]);
             setReviewOffset(offset + limit);
             setHasMoreReviews(data.hasMore);
@@ -192,23 +188,30 @@ export default function Dashboard() {
         e.preventDefault();
         logout();
         // Redirect to login page after logout
-        console.log('Logging out and redirecting to login page');
         router.push('/login');
     }
 
     return (
-        <div className="p-8">
-            <div className="flex justify-between items-center mb-8">
-                <h1 className="text-3xl font-bold">Hello {(user as any)?.name || ''}</h1>
-                <div className="flex gap-4">
-                    <button
-                        onClick={handleLogout}
-                        className="px-6 py-2 bg-red-500 text-white rounded hover:bg-red-600"
-                    >
-                        Logout
-                    </button>
+        <div>
+            {/* Header */}
+            <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
+                <div className="px-8 py-6 flex items-center justify-between">
+                    <div className="flexliving-logo" style={{ color: "#3D4A3B" }}>
+                        <span style={{ color: "#B4E051" }}>F</span>LEXLIVING
+                    </div>
+                    <div className="flex items-center gap-6">
+                        <span className="text-gray-700">👋 Bonjour {(user as any)?.name || 'Ryan'}</span>
+                        <button
+                            onClick={handleLogout}
+                            className="px-4 py-2 text-sm text-gray-700 hover:text-gray-900 font-medium"
+                        >
+                            Logout
+                        </button>
+                    </div>
                 </div>
-            </div>
+            </header>
+
+            <div className="p-8">
 
             <DetailModal
                 isOpen={isModalOpen}
@@ -237,7 +240,6 @@ export default function Dashboard() {
 
                             // Reload the property listings related to the review
                             const updatedRatingAverage = listingStats?.overallAverage || 0;
-                            console.log("Updated Average:", updatedRatingAverage);
                             const listingIndex = listings.findIndex(l => l.id === updatedReview.listingId);
                             if (listingIndex !== -1) {
                                 const updatedListings = [...listings];
@@ -256,14 +258,14 @@ export default function Dashboard() {
 
             {/* Listings Section */}
             <div className="mb-8">
-                <h2 className="text-2xl font-bold mb-4">Listings</h2>
+                <h2 className="text-2xl font-bold mb-5 mt-8">Listings</h2>
                 <input
                     type="text"
                     placeholder="Search listings..."
                     value={searchQuery}
                     onChange={(e) => handleSearch(e.target.value)}
                     className="w-full px-4 py-2 border rounded mb-4"
-                    disabled={isReviewLoading}
+                    disabled={isListingLoading}
                 />
                 {isListingLoading ? (
                     <ListingsLoadingSkeleton count={5} />
@@ -312,7 +314,7 @@ export default function Dashboard() {
 
             {/* Reviews Section */}
             <div className="mt-12">
-                <h2 className="text-2xl font-bold mb-4">Reviews</h2>
+                <h2 className="text-2xl font-bold mb-5 mt-8">Reviews</h2>
                 <FilterBar listings={listings} onFilterChange={setFilters} channelOptions={channels} />
 
                 {(filteredReviews.length === 0 && !isReviewLoading) ? (
@@ -370,6 +372,7 @@ export default function Dashboard() {
                     />
                 )}
             </DetailModal>
+            </div>
         </div>
     );
 }

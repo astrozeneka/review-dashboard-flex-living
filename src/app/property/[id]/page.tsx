@@ -4,6 +4,7 @@ import { PropertyMap } from "@/app/components/PropertyMap";
 import { commonAmenities } from "@/app/utils/amenityIcons";
 import { Review } from "@/app/types/review";
 import { reviewService } from "@/app/services/ReviewService";
+import { StarRating } from "@/app/components/StarRating";
 
 /**
  * Server-side component that renders the property detail page.
@@ -439,12 +440,9 @@ export default async function PropertyDetail({ params }: { params: { id: string 
                                             </div>
                                         </div>
                                         {review.rating && (
-                                            <div className="review-rating">
-                                                {[...Array(5)].map((_, i) => (
-                                                    <span key={i} className="star">
-                                                        {i < review.rating! ? '★' : '☆'}
-                                                    </span>
-                                                ))}
+                                            <div className="flex flex-col items-center gap-2">
+                                                <div className="text-sm font-semibold">{review.rating}/10</div>
+                                                <StarRating rating={review.rating / 2} />
                                             </div>
                                         )}
                                     </div>
@@ -452,23 +450,7 @@ export default async function PropertyDetail({ params }: { params: { id: string 
                                     {review.publicReview && (
                                         <p className="review-text">{review.publicReview}</p>
                                     )}
-
-                                    {review.reviewCategory && review.reviewCategory.length > 0 && (
-                                        <div className="review-categories">
-                                            {review.reviewCategory.map((category, idx) => (
-                                                <div key={idx} className="category-item">
-                                                    <div className="category-name">{category.category}</div>
-                                                    <div className="category-rating">
-                                                        {[...Array(5)].map((_, i) => (
-                                                            <span key={i} className="star">
-                                                                {i < category.rating ? '★' : '☆'}
-                                                            </span>
-                                                        ))}
-                                                    </div>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    )}
+                                    
                                 </div>
                             ))}
                         </div>

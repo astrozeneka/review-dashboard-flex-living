@@ -43,7 +43,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     useEffect(() => {
         const storedToken = localStorage.getItem('token');
         const storedRefreshToken = localStorage.getItem('refreshToken');
-        console.log("Sotred Token:", storedToken);
 
         if (storedToken && storedRefreshToken) {
             setToken(storedToken);
@@ -191,7 +190,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         setUser(null);
         setToken(null);
         setRefreshToken(null);
-        console.log("Logging out, clearing localStorage and cookies");
         localStorage.removeItem('token');
         localStorage.removeItem('refreshToken');
         localStorage.removeItem('userData');
